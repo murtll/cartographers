@@ -27,11 +27,11 @@ docker compose up
 backend/    Go server
   cmd/server/       entry point
   internal/game/    game rules — no HTTP, no database
+  internal/boards/  board layouts (mountains, ruins, chasm): loader + JSON
   internal/room/    one goroutine per room, event fold, per-player projection
   internal/store/   Postgres access
   internal/api/     HTTP handlers and SSE
   migrations/       SQL migrations
-  data/boards/      board layouts (mountains, ruins, chasms)
 frontend/   React + TypeScript (Vite)
 infra/      deployment, currently a placeholder
 docs/plans/ design and step-by-step plans (written in Russian)
@@ -39,6 +39,9 @@ docs/plans/ design and step-by-step plans (written in Russian)
 
 The `internal/game` package must never import `net/http` or a database driver.
 Rules are pure functions so they can be tested without a server.
+
+Data files live inside the package that reads them, not in a shared `data/`
+directory: `//go:embed` cannot reference parent directories.
 
 ## Conventions
 
