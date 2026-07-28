@@ -1,8 +1,8 @@
-// Command server is the HTTP entry point of the Cartographers backend.
+// Команда server — точка входа HTTP-сервера «Картографов».
 //
-// At this stage it only exposes a health check so the container and the
-// docker-compose wiring can be verified end to end. Game logic, storage and
-// SSE streaming are added in the following steps of the M0.5 plan.
+// Пока здесь только проверка живости: по ней видно, что контейнер собрался и
+// что docker compose связал сервисы правильно. Правила игры, база и стрим
+// событий появятся на следующих шагах плана M0.5.
 package main
 
 import (
@@ -33,8 +33,9 @@ func main() {
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
-	// SSE streams stay open for the whole game, so there is deliberately no
-	// WriteTimeout here. Per-request deadlines are handled by the handlers.
+	// WriteTimeout здесь нет намеренно: стрим событий висит открытым всю партию,
+	// и общий таймаут на запись его бы обрывал. Сроки на отдельные запросы
+	// ставят сами ручки.
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()

@@ -1,54 +1,67 @@
-# Cartographers Online
+# Картографы онлайн
 
-Online implementation of the *Cartographers* board game (Jordy Adan, 2020).
-Go backend + React frontend in a single repository.
+Онлайн-версия настольной игры «Картографы» (Жорди Адан, 2020).
+Сервер на Go, браузерная часть на React, всё в одном репозитории.
 
-Rules are the source of truth:
+Источник истины по правилам:
 <https://tesera.ru/images/items/1711725/Rules-kartografy-rus.pdf>
 
-Game components, artwork and card flavour text are copyrighted
-(© 2020 Thunderworks Games) and are **not** reproduced here — the graphics in
-this project are original.
+Компоненты игры, иллюстрации и художественный текст защищены авторским правом
+(© 2020 Thunderworks Games) и здесь **не** воспроизводятся — вся графика в проекте
+своя.
 
-## Run locally
+## Запуск
 
 ```sh
 cp .env.example .env
 docker compose up
 ```
 
-- frontend — <http://localhost:5173>
-- backend health check — <http://localhost:8080/healthz>
+- браузерная часть — <http://localhost:5173>
+- проверка живости сервера — <http://localhost:8080/healthz>
 - postgres — `localhost:5432`
 
-## Layout
+Подробнее, включая разработку без пересборки контейнера и разбор частых ошибок:
+[docs/local-setup.md](docs/local-setup.md).
+
+## Документация
+
+| файл | о чём |
+|------|-------|
+| [docs/local-setup.md](docs/local-setup.md) | локальное окружение: запуск, тесты, команды на каждый день, частые грабли |
+| [docs/game-rules.md](docs/game-rules.md) | задача игры и правила своими словами + таблица «термин из правил → имя в коде» |
+| [docs/tasks-by-topic.md](docs/tasks-by-topic.md) | план, разрезанный на самостоятельные темы, с порядком между ними |
+| [docs/plans/20260728-cartographers-m05.md](docs/plans/20260728-cartographers-m05.md) | полный план этапа M0.5: решения, обоснования, словарик терминов |
+
+## Раскладка
 
 ```
-backend/    Go server
-  cmd/server/       entry point
-  internal/game/    game rules — no HTTP, no database
-  internal/boards/  board layouts (mountains, ruins, chasm): loader + JSON
-  internal/room/    one goroutine per room, event fold, per-player projection
-  internal/store/   Postgres access
-  internal/api/     HTTP handlers and SSE
-  migrations/       SQL migrations
+backend/    сервер на Go
+  cmd/server/       точка входа
+  internal/game/    правила игры — без HTTP и без базы
+  internal/boards/  разметка планшетов (горы, руины, ущелья): загрузчик + JSON
+  internal/room/    горутина на комнату, свёртка событий, проекция для игрока
+  internal/store/   работа с Postgres
+  internal/api/     HTTP-ручки и SSE
+  migrations/       миграции SQL
 frontend/   React + TypeScript (Vite)
-infra/      deployment, currently a placeholder
-docs/plans/ design and step-by-step plans (written in Russian)
+infra/      развёртывание, пока заглушка
+docs/       документация
 ```
 
-The `internal/game` package must never import `net/http` or a database driver.
-Rules are pure functions so they can be tested without a server.
+Пакет `internal/game` не должен импортировать ни `net/http`, ни драйвер базы. Правила —
+чистые функции, поэтому тестируются без сервера.
 
-Data files live inside the package that reads them, not in a shared `data/`
-directory: `//go:embed` cannot reference parent directories.
+Файлы с данными лежат внутри того пакета, который их читает, а не в общей папке `data/`:
+`//go:embed` не умеет брать файлы из родительских каталогов.
 
-## Conventions
+## Договорённости
 
-Code, identifiers, comments, commit messages and PR descriptions are English.
-Only the documents under `docs/plans/` are written in Russian.
+Документация и комментарии в коде — **на русском**. Названия в коде, сообщения коммитов
+и описания пул-реквестов — на английском.
 
-## Current status
+## Где мы сейчас
 
-Milestone **M0.5** — skeleton with a degenerate game (all shapes are a single
-cell). See [docs/plans/20260728-cartographers-m05.md](docs/plans/20260728-cartographers-m05.md).
+Этап **M0.5** — каркас с вырожденной игрой: все фигуры размером в одну клетку.
+План: [docs/plans/20260728-cartographers-m05.md](docs/plans/20260728-cartographers-m05.md).
+Что из этого можно взять в работу: [docs/tasks-by-topic.md](docs/tasks-by-topic.md).

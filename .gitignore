@@ -1,4 +1,4 @@
-# secrets — never commit
+# секреты — не коммитить
 .env
 
 # node
@@ -10,10 +10,10 @@ dist/
 *.test
 *.out
 
-# editors / os
+# редакторы и ос
 .DS_Store
 .idea/
 .vscode/
 
-# local scratch
+# локальный мусор
 .venv/

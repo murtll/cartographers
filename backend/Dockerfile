@@ -1,4 +1,4 @@
-# Build stage: full Go toolchain, discarded afterwards.
+# Стадия сборки: полный тулчейн Go, потом он выбрасывается.
 FROM golang:1-alpine AS build
 
 WORKDIR /src
@@ -8,7 +8,7 @@ RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 go build -trimpath -o /out/server ./cmd/server
 
-# Runtime stage: only the static binary ships.
+# Стадия запуска: в образ попадает только собранный бинарник.
 FROM alpine:3
 
 RUN adduser -D -u 10001 app
