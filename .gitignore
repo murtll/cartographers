@@ -1,0 +1,19 @@
+# secrets — never commit
+.env
+
+# node
+node_modules/
+dist/
+
+# go
+/backend/server
+*.test
+*.out
+
+# editors / os
+.DS_Store
+.idea/
+.vscode/
+
+# local scratch
+.venv/
