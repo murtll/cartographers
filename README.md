@@ -30,7 +30,7 @@ docker compose up
 |------|-------|
 | [docs/local-setup.md](docs/local-setup.md) | локальное окружение: запуск, тесты, команды на каждый день, частые грабли |
 | [docs/game-rules.md](docs/game-rules.md) | задача игры и правила своими словами + таблица «термин из правил → имя в коде» |
-| [docs/tasks-by-topic.md](docs/tasks-by-topic.md) | план, разрезанный на самостоятельные темы, с порядком между ними |
+| [docs/tasks-by-topic.md](docs/tasks-by-topic.md) | список задач M0.5 по темам и фазам; подробности каждой — в [docs/tasks/](docs/tasks/) |
 | [docs/plans/20260728-cartographers-m05.md](docs/plans/20260728-cartographers-m05.md) | полный план этапа M0.5: решения, обоснования, словарик терминов |
 
 ## Раскладка
