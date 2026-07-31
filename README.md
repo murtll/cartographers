@@ -31,7 +31,10 @@ docker compose up
 | [docs/local-setup.md](docs/local-setup.md) | локальное окружение: запуск, тесты, команды на каждый день, частые грабли |
 | [docs/game-rules.md](docs/game-rules.md) | задача игры и правила своими словами + таблица «термин из правил → имя в коде» |
 | [docs/tasks-by-topic.md](docs/tasks-by-topic.md) | список задач M0.5 по темам и фазам; подробности каждой — в [docs/tasks/](docs/tasks/) |
-| [docs/plans/20260728-cartographers-m05.md](docs/plans/20260728-cartographers-m05.md) | полный план этапа M0.5: решения, обоснования, словарик терминов |
+| [docs/architecture.md](docs/architecture.md) | что строим, раскладка папок, актор на комнату, принятые договорённости |
+| [docs/stack.md](docs/stack.md) | какие библиотеки взяли и, главное, какие не взяли и почему |
+| [docs/glossary.md](docs/glossary.md) | словарик: 73 термина, на него ссылается вся остальная документация |
+| [docs/roadmap.md](docs/roadmap.md) | что будет после M0.5 и что ещё не решено |
 
 ## Раскладка
 
@@ -63,5 +66,5 @@ docs/       документация
 ## Где мы сейчас
 
 Этап **M0.5** — каркас с вырожденной игрой: все фигуры размером в одну клетку.
-План: [docs/plans/20260728-cartographers-m05.md](docs/plans/20260728-cartographers-m05.md).
-Что из этого можно взять в работу: [docs/tasks-by-topic.md](docs/tasks-by-topic.md).
+Зачем именно так: [docs/architecture.md](docs/architecture.md).
+Что можно взять в работу: [docs/tasks-by-topic.md](docs/tasks-by-topic.md).
