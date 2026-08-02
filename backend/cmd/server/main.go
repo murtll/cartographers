@@ -21,6 +21,7 @@ func main() {
 
 	addr := ":" + env("PORT", "8080")
 
+	// Health check
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
