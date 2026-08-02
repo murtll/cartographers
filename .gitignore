@@ -7,7 +7,7 @@ dist/
 
 # go
 /backend/server
-/backend/cmd/server/app
+/backend/app
 *.test
 *.out
 
