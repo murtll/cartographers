@@ -14,10 +14,18 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/murtll/cartographers/backend/internal/boards"
 )
 
 func main() {
 	log := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
+	//TODO: вызывать boards.go(LoadAll) и проверять ошибки, падать если что то не так. писать ошибки в log
+	if err := boards.LoadAll(); err != nil {
+		log.Error(err.Error())
+		os.Exit(1)
+	}
 
 	addr := ":" + env("PORT", "8080")
 
