@@ -17,7 +17,11 @@ const (
 	CellChasm    Cell = 3 // нельзя, только на стороне Б
 )
 
-type Grid [11][11]Cell // [строка][столбец], с нуля, строка 0 — верхняя
+const (
+	BoardSize = 11
+)
+
+type Grid [BoardSize][BoardSize]Cell // [строка][столбец], с нуля, строка 0 — верхняя
 
 type Board struct {
 	ID   string `json:"id"`
@@ -32,11 +36,16 @@ var boards = make(map[string]Board, 2)
 var jsonFiles embed.FS
 
 func (g *Grid) UnmarshalJSON(data []byte) error {
-	var gs [11]string
+	var gs []string
 	err := json.Unmarshal(data, &gs)
 	if err != nil {
 		return err
 	}
+
+	if len(gs) != BoardSize {
+		return errors.New("board loaded incorrect, incorrect number of rows " + strconv.Itoa(len(gs)))
+	}
+
 	grid, err := parseBoard(gs)
 	if err != nil {
 		return err
@@ -56,8 +65,8 @@ func Load(filename string) error {
 		return errors.New(filename + ": " + err.Error())
 	}
 
-	if filename != tempBoard.ID {
-		return errors.New("File name does not match with his ID")
+	if filename != tempBoard.ID+".json" {
+		return errors.New("file name does not match its ID: filename = " + filename + ", board.ID = " + tempBoard.ID)
 	}
 
 	boards[tempBoard.ID] = tempBoard
@@ -80,16 +89,12 @@ func LoadAll() error {
 	return nil
 }
 
-func parseBoard(gs [11]string) (Grid, error) {
+func parseBoard(gs []string) (Grid, error) {
 	var grid Grid
 
-	if len(gs) != 11 {
-		return grid, errors.New("board loaded incorrect, incorrect number of rows")
-	}
-
 	for x, i := range gs {
-		if utf8.RuneCountInString(i) != 11 {
-			return grid, errors.New("board loaded incorrect, incorrect number of symbols")
+		if sl := utf8.RuneCountInString(i); sl != BoardSize {
+			return grid, errors.New("board loaded incorrect, incorrect number of symbols " + strconv.Itoa(sl) + " in row: " + strconv.Itoa(x))
 		}
 		for y, j := range i {
 			switch {
