@@ -30,7 +30,7 @@ docker compose up
 |------|-------|
 | [docs/local-setup.md](docs/local-setup.md) | локальное окружение: запуск, тесты, команды на каждый день, частые грабли |
 | [docs/game-rules.md](docs/game-rules.md) | задача игры и правила своими словами + таблица «термин из правил → имя в коде» |
-| [docs/tasks-by-topic.md](docs/tasks-by-topic.md) | список задач M0.5 по темам и фазам; подробности каждой — в [docs/tasks/](docs/tasks/) |
+| [доска задач](https://github.com/users/murtll/projects/2) | что делаем, что в работе, что готово — источник правды по задачам |
 | [docs/architecture.md](docs/architecture.md) | что строим, раскладка папок, актор на комнату, принятые договорённости |
 | [docs/stack.md](docs/stack.md) | какие библиотеки взяли и, главное, какие не взяли и почему |
 | [docs/glossary.md](docs/glossary.md) | словарик: 73 термина, на него ссылается вся остальная документация |
@@ -67,4 +67,5 @@ docs/       документация
 
 Этап **M0.5** — каркас с вырожденной игрой: все фигуры размером в одну клетку.
 Зачем именно так: [docs/architecture.md](docs/architecture.md).
-Что можно взять в работу: [docs/tasks-by-topic.md](docs/tasks-by-topic.md).
+Что можно взять в работу: [доска задач](https://github.com/users/murtll/projects/2),
+метка `phase-1` — это те, что не ждут ничего.
