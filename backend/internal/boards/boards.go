@@ -45,9 +45,6 @@ func (g *Grid) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// TODO: передавать filename и читать по filename +
-// TODO: добавлять board в map(boards) +
-// TODO: добавить проверку на fileame == board.ID +
 func Load(filename string) error {
 	var tempBoard Board
 	data, err := jsonFiles.ReadFile(filename)
@@ -68,7 +65,6 @@ func Load(filename string) error {
 	return nil
 }
 
-// TODO: проходит циклом по всем файлам json и вызывать Load()
 func LoadAll() error {
 	files, err := jsonFiles.ReadDir(".")
 	if err != nil {
