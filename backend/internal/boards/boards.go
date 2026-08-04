@@ -20,74 +20,95 @@ const (
 type Grid [11][11]Cell // [строка][столбец], с нуля, строка 0 — верхняя
 
 type Board struct {
-	ID   string
-	Name string
-	Grid Grid
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Grid Grid   `json:"grid"`
 }
 
-// временная структура что бы корректо загрузить Grid
-type tempBoard struct {
-	ID   string   `json:"id"`
-	Name string   `json:"name"`
-	Grid []string `json:"grid"`
-}
-
+// мапа для сохранения распаршенных board
 var boards = make(map[string]Board, 2)
 
 //go:embed *.json
 var jsonFiles embed.FS
 
-// TODO: передавать filename и читать по filename
-// TODO: добавлять board в map(boards)
-// TODO: добавить проверку на fileame == board.ID
-func Load(filename string) error {
-	var tempboard tempBoard
+func (g *Grid) UnmarshalJSON(data []byte) error {
+	var gs [11]string
+	err := json.Unmarshal(data, &gs)
+	if err != nil {
+		return err
+	}
+	grid, err := parseBoard(gs)
+	if err != nil {
+		return err
+	}
+	*g = grid
+	return nil
+}
 
-	data, err := jsonFiles.ReadFile("wildlands.json")
+// TODO: передавать filename и читать по filename +
+// TODO: добавлять board в map(boards) +
+// TODO: добавить проверку на fileame == board.ID +
+func Load(filename string) error {
+	var tempBoard Board
+	data, err := jsonFiles.ReadFile(filename)
 	if err != nil {
 		return errors.New("failed to open json file: " + err.Error())
 	}
 
-	if err := json.Unmarshal(data, &tempboard); err != nil {
-		return err
+	if err := json.Unmarshal(data, &tempBoard); err != nil {
+		return errors.New(filename + ": " + err.Error())
 	}
+
+	if filename != tempBoard.ID {
+		return errors.New("File name does not match with his ID")
+	}
+
+	boards[tempBoard.ID] = tempBoard
 
 	return nil
 }
 
 // TODO: проходит циклом по всем файлам json и вызывать Load()
 func LoadAll() error {
+	files, err := jsonFiles.ReadDir(".")
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		if err := Load(file.Name()); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
-func parseBoard(tempboard tempBoard) (Board, error) {
-	board := Board{
-		ID:   tempboard.ID,
-		Name: tempboard.Name,
+func parseBoard(gs [11]string) (Grid, error) {
+	var grid Grid
+
+	if len(gs) != 11 {
+		return grid, errors.New("board loaded incorrect, incorrect number of rows")
 	}
 
-	if len(tempboard.Grid) != 11 {
-		return board, errors.New("board loaded incorrect, incorrect number of rows")
-	}
-
-	for x, i := range tempboard.Grid {
+	for x, i := range gs {
 		if utf8.RuneCountInString(i) != 11 {
-			return board, errors.New("board loaded incorrect, incorrect number of symbols")
+			return grid, errors.New("board loaded incorrect, incorrect number of symbols")
 		}
 		for y, j := range i {
 			switch {
 			case j == '.':
-				board.Grid[x][y] = CellPlain
+				grid[x][y] = CellPlain
 			case j == 'M':
-				board.Grid[x][y] = CellMountain
+				grid[x][y] = CellMountain
 			case j == 'R':
-				board.Grid[x][y] = CellRuins
+				grid[x][y] = CellRuins
 			case j == 'C':
-				board.Grid[x][y] = CellChasm
+				grid[x][y] = CellChasm
 			default:
-				return board, errors.New(board.ID + ".json:" + " row " + strconv.Itoa(x) + " symbol " + strconv.Itoa(y) + " : unknown symbol " + string(j))
+				return grid, errors.New("row " + strconv.Itoa(x) + " symbol " + strconv.Itoa(y) + " : unknown symbol " + string(j))
 			}
 		}
 	}
-	return board, nil
+	return grid, nil
 }
