@@ -1,93 +1,153 @@
 /* Все стили каркаса в одном файле: пока экранов три, искать их по каталогам дороже,
-   чем пролистать этот файл сверху вниз. Цвета местности одни на светлую и тёмную темы —
-   это «краска на карте», меняется только обвязка вокруг поля. */
+   чем пролистать этот файл сверху вниз.
+
+   Оформление — старая карта: пергамент, чернильные линии, серифный шрифт, красный
+   сургуч как единственный акцент. Отсюда правило: скруглений почти нет, тени не
+   размазываем, рамки рисуем в две линии, как на печатной карточке.
+
+   Цвета самой карты владений живут в :root и в тёмной теме не меняются: лист бумаги
+   остаётся листом бумаги, темнеет только стол вокруг него. */
 
 :root {
-  --bg: #f6f4ee;
-  --panel: #fffdf8;
-  --text: #5b6270;
-  --text-strong: #14181f;
-  --border: #ded9cd;
-  --accent: #2f6fd1;
+  /* обвязка: пергамент и чернила */
+  --bg: #e7dbc0;
+  --panel: #f3ead5;
+  --ink: #2a2118;
+  --ink-soft: #6d5c45;
+  --rule: #c3ad86;
+  --rule-hard: #8a7048;
+  --seal: #9b2f22;
+  --gold: #a3812f;
+  --done: #46774f;
 
-  /* поле */
-  --paper: #fbfaf5;
-  --grid: #cec9ba;
+  /* карта владений — одинаково в любой теме */
+  --paper: #f6eeda;
+  --paper-line: #b9a37e;
+  --board-frame: #2a2118;
+  --forest: #3f6b47;
+  --village: #a8452f;
+  --water: #3a6a86;
+  --farm: #c39a3b;
+  --monster: #6a4472;
+  --mountain-bg: #cdc1a5;
+  --mountain-ink: #4d4133;
+  --ruins-ink: #9a6b1f;
+  --chasm-bg: #7b7361;
+  --chasm-ink: #2f2a20;
 
-  /* типы местности */
-  --forest: #2f7d4f;
-  --village: #c2410c;
-  --water: #2f6fd1;
-  --farm: #d4a017;
-  --monster: #7141bb;
+  --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia,
+    serif;
+  --mono: ui-monospace, Consolas, monospace;
+  /* Клетка меряется и по ширине, и по высоте окна: карта из 11 клеток должна влезать в
+     невысокий ноутбучный экран целиком, без прокрутки. */
+  --cell: clamp(20px, min(7vw, 4.6vh), 38px);
 
-  /* разметка планшета */
-  --mountain-bg: #c6c0b0;
-  --mountain-ink: #6f6858;
-  --ruins-ink: #b45309;
-  --chasm-bg: #6b7180;
-  --chasm-ink: #3a3f4b;
-
-  --cell: clamp(22px, 4.4vw, 34px);
-
-  font: 17px/145% system-ui, 'Segoe UI', Roboto, sans-serif;
+  font: 17px/150% var(--serif);
   color-scheme: light dark;
-  color: var(--text);
+  color: var(--ink);
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #15171c;
-    --panel: #1c1f26;
-    --text: #9ca3af;
-    --text-strong: #f2f4f7;
-    --border: #2d323c;
-    --accent: #7aa7ff;
-
-    --paper: #232830;
-    --grid: #343a46;
-
-    --mountain-bg: #464d5a;
-    --mountain-ink: #9aa3b3;
-    --ruins-ink: #f0a13c;
-    --chasm-bg: #383e4a;
-    --chasm-ink: #1d2129;
+    --bg: #1b1611;
+    --panel: #251e17;
+    --ink: #e9dbbd;
+    --ink-soft: #a8977a;
+    --rule: #4a3d2c;
+    --rule-hard: #6d5a3f;
+    --seal: #c2503c;
+    --gold: #c39b46;
+    --done: #7fa877;
   }
 }
 
+/* Пергамент неровный: два очень мягких пятна вместо картинки-текстуры. */
 body {
   margin: 0;
+  background-image:
+    radial-gradient(60% 40% at 20% 8%, rgb(0 0 0 / 4%), transparent),
+    radial-gradient(50% 45% at 85% 65%, rgb(0 0 0 / 4%), transparent);
 }
 
 h1,
 h2 {
-  color: var(--text-strong);
+  color: var(--ink);
   font-weight: 600;
   margin: 0;
 }
 
-h1 {
-  font-size: 38px;
-  letter-spacing: -0.6px;
-}
-
 h2 {
-  font-size: 18px;
-  margin: 24px 0 8px;
+  font-size: 17px;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  margin: 22px 0 10px;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 4px;
 }
 
 p {
   margin: 0;
 }
 
-/* --- экраны ------------------------------------------------------------------ */
+strong {
+  color: var(--ink);
+  letter-spacing: 0.06em;
+}
+
+/* --- заголовки и мелкий текст ------------------------------------------------- */
+
+.title {
+  font-size: 44px;
+  font-variant: small-caps;
+  letter-spacing: 0.05em;
+  line-height: 115%;
+}
+
+.title--small {
+  font-size: 27px;
+}
+
+/* Ромб — украшение титульного листа, в шапке комнаты он только съедает высоту. */
+.title--small::after {
+  display: none;
+}
+
+/* Ромб под заголовком вместо линейки — так же, как на титульных листах книг. */
+.title::after {
+  content: '◆';
+  display: block;
+  margin-top: 10px;
+  font-size: 10px;
+  font-variant: normal;
+  letter-spacing: 0;
+  color: var(--gold);
+}
+
+.lead {
+  max-width: 34em;
+  color: var(--ink-soft);
+}
+
+.note {
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.compass {
+  width: 78px;
+  height: 78px;
+  color: var(--gold);
+}
+
+/* --- экраны ------------------------------------------------------------------- */
 
 .screen {
-  max-width: 1000px;
+  max-width: 1140px;
   margin: 0 auto;
-  padding: 32px 20px 48px;
+  padding: 24px 20px 32px;
   box-sizing: border-box;
 }
 
@@ -97,50 +157,86 @@ p {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 20px;
+  gap: 18px;
   text-align: center;
 }
 
-.lead {
-  max-width: 34em;
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule);
 }
 
-.note {
-  font-size: 14px;
-  opacity: 0.75;
+.wordmark {
+  font-size: 20px;
+  font-variant: small-caps;
+  letter-spacing: 0.1em;
+  color: var(--ink);
+  text-decoration: none;
 }
 
-/* --- кнопки и поля ----------------------------------------------------------- */
+/* --- карточки, кнопки, поля --------------------------------------------------- */
+
+/* Рамка в две линии: узкая внутренняя и поле пергамента между ними. */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--rule-hard);
+  box-shadow:
+    0 0 0 3px var(--bg),
+    0 0 0 4px var(--rule);
+}
 
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
   justify-content: center;
 }
 
 .button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font: inherit;
-  color: var(--text-strong);
+  font-size: 16px;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  color: var(--ink);
   background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 18px;
+  border: 1px solid var(--rule-hard);
+  border-radius: 2px;
+  padding: 9px 20px;
+  text-decoration: none;
   cursor: pointer;
 }
 
 .button:hover:not(:disabled) {
-  border-color: var(--accent);
+  border-color: var(--ink);
+  background: var(--bg);
 }
 
 .button--main {
-  color: #fff;
-  background: var(--accent);
-  border-color: var(--accent);
+  color: #f6eeda;
+  background: var(--seal);
+  border-color: var(--seal);
+}
+
+.button--main:hover:not(:disabled) {
+  color: #f6eeda;
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.button--small {
+  font-size: 13px;
+  padding: 4px 12px;
 }
 
 .button:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: default;
 }
 
@@ -150,6 +246,7 @@ p {
   gap: 16px;
   width: 100%;
   max-width: 320px;
+  padding: 22px;
   text-align: left;
 }
 
@@ -157,7 +254,10 @@ p {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 14px;
+  font-size: 13px;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
   border: 0;
   padding: 0;
   margin: 0;
@@ -165,15 +265,18 @@ p {
 
 .input {
   font: inherit;
-  color: var(--text-strong);
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 12px;
+  font-size: 17px;
+  font-variant: normal;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--rule-hard);
+  border-radius: 2px;
+  padding: 9px 12px;
 }
 
 .input:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 1px solid var(--seal);
   outline-offset: 1px;
 }
 
@@ -182,48 +285,77 @@ p {
   align-items: center;
   gap: 8px;
   font-size: 16px;
+  font-variant: normal;
+  letter-spacing: 0;
+  color: var(--ink);
+  accent-color: var(--seal);
 }
 
-/* --- комната ----------------------------------------------------------------- */
+/* --- комната ------------------------------------------------------------------ */
 
 .room__head {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border);
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  text-align: center;
 }
 
-.room__title {
-  font-size: 26px;
+.room__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 14px;
+}
+
+.invite {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.invite__url {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  padding: 3px 8px;
 }
 
 .stats {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 22px;
+  justify-content: center;
+  gap: 4px 30px;
   list-style: none;
-  margin: 0;
-  padding: 0;
+  margin: 6px 0 0;
+  padding: 8px 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  width: 100%;
 }
 
 .stats li {
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
 .stats__label {
   font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  opacity: 0.7;
+  font-variant: small-caps;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
 }
 
 .stats__value {
-  font-size: 20px;
-  color: var(--text-strong);
+  font-size: 22px;
+  color: var(--ink);
 }
 
 .countdown {
@@ -231,42 +363,60 @@ p {
 }
 
 .countdown--over {
-  color: var(--village);
+  color: var(--seal);
 }
 
+/* Карта ровно посередине страницы: боковые колонки одинаковой ширины, средняя — по
+   размеру самой карты. */
 .room__body {
   display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 32px;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 34px;
   align-items: start;
-  margin-top: 24px;
+  margin-top: 18px;
 }
 
-@media (max-width: 820px) {
-  .room__body {
-    grid-template-columns: 1fr;
-  }
+.room__col {
+  min-width: 0;
 }
 
-.room__board {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.room__side h2:first-child {
+.room__col h2:first-child {
   margin-top: 0;
 }
 
-/* --- карта владений ---------------------------------------------------------- */
+.room__map {
+  padding: 6px;
+}
 
-/* Линии сетки — это фон под клетками, видимый через зазоры. */
+@media (max-width: 980px) {
+  .room__body {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 24px;
+  }
+
+  .room__map {
+    order: -1;
+  }
+
+  .room__col {
+    width: 100%;
+    max-width: 420px;
+  }
+}
+
+/* --- карта владений ----------------------------------------------------------- */
+
+/* Линии сетки — это фон под клетками, видимый через зазоры. Рамка в две линии, как у
+   печатной карточки. */
 .board {
   display: grid;
-  gap: 2px;
-  padding: 6px;
-  background: var(--grid);
-  border-radius: 6px;
+  gap: 1px;
+  padding: 5px;
+  background: var(--paper-line);
+  border: 2px solid var(--board-frame);
+  outline: 1px solid var(--board-frame);
+  outline-offset: 4px;
   width: max-content;
 }
 
@@ -286,12 +436,13 @@ p {
 
 /* Подсветка того, куда попадёт клик. Занятые клетки выключены и не подсвечиваются. */
 .cell:hover:not(:disabled) {
-  box-shadow: inset 0 0 0 2px var(--accent);
+  box-shadow: inset 0 0 0 2px var(--board-frame);
 }
 
 .cell:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--seal);
   outline-offset: 1px;
+  z-index: 1;
 }
 
 .swatch {
@@ -301,8 +452,7 @@ p {
   width: 18px;
   height: 18px;
   background: var(--paper);
-  border: 1px solid var(--grid);
-  border-radius: 3px;
+  border: 1px solid var(--board-frame);
 }
 
 /* Нарисованное игроком. */
@@ -361,7 +511,6 @@ p {
   position: absolute;
   inset: 15%;
   border: 2px dashed var(--ruins-ink);
-  border-radius: 2px;
 }
 
 .legend {
@@ -372,6 +521,7 @@ p {
   margin: 0;
   padding: 0;
   font-size: 14px;
+  color: var(--ink-soft);
 }
 
 .legend li {
@@ -380,27 +530,31 @@ p {
   gap: 10px;
 }
 
-/* --- варианты хода ----------------------------------------------------------- */
+/* --- варианты хода ------------------------------------------------------------ */
 
 .picker {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 .picker__option {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px;
+  gap: 10px;
+  padding: 14px;
   background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  border: 1px solid var(--rule-hard);
+  box-shadow:
+    0 0 0 3px var(--bg),
+    0 0 0 4px var(--rule);
 }
 
 .picker__shape {
-  font-size: 14px;
-  opacity: 0.75;
+  font-size: 13px;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
 }
 
 .picker__terrains {
@@ -415,28 +569,31 @@ p {
   gap: 8px;
   font: inherit;
   font-size: 15px;
-  color: var(--text-strong);
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 6px 10px;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--rule-hard);
+  border-radius: 2px;
+  padding: 6px 12px;
   cursor: pointer;
 }
 
-.terrain[aria-pressed='true'] {
-  border-color: var(--accent);
-  box-shadow: inset 0 0 0 1px var(--accent);
+.terrain:hover {
+  border-color: var(--ink);
 }
 
-/* --- игроки ------------------------------------------------------------------ */
+.terrain[aria-pressed='true'] {
+  border-color: var(--seal);
+  box-shadow: inset 0 0 0 1px var(--seal);
+}
+
+/* --- игроки ------------------------------------------------------------------- */
 
 .players {
   list-style: none;
   margin: 0;
   padding: 0;
   background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  border: 1px solid var(--rule-hard);
 }
 
 .players__item {
@@ -445,34 +602,35 @@ p {
   justify-content: space-between;
   gap: 12px;
   padding: 10px 12px;
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .players__item + .players__item {
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--rule);
 }
 
 .players__name {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--text-strong);
+  color: var(--ink);
 }
 
 .badge {
-  font-size: 12px;
-  color: var(--accent);
-  border: 1px solid var(--accent);
-  border-radius: 999px;
-  padding: 1px 8px;
+  font-size: 11px;
+  font-variant: small-caps;
+  letter-spacing: 0.1em;
+  color: var(--seal);
+  border: 1px solid var(--seal);
+  padding: 1px 7px;
 }
 
 .players__done {
-  color: var(--forest);
+  color: var(--done);
   font-size: 14px;
 }
 
 .players__wait {
   font-size: 14px;
-  opacity: 0.7;
+  color: var(--ink-soft);
 }
