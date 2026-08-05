@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
+import { ThemeToggle } from '../components/ThemeToggle'
 import { BOARD_NAMES } from '../labels'
 import { readNick } from '../nick'
 import { DEFAULT_BOARD_ID, STUB_BOARDS } from '../stubs'
@@ -36,6 +37,10 @@ export function JoinRoom({ mode, initialCode = '', onSubmit }: Props) {
 
   return (
     <section className="screen screen--center">
+      <div className="corner">
+        <ThemeToggle />
+      </div>
+
       <h1 className="title">{TITLES[mode]}</h1>
 
       {mode === 'invited' ? (

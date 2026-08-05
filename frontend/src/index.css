@@ -6,8 +6,10 @@
    размазываем, рамки рисуем в две линии, как на печатной карточке. Рисунки в клетках —
    гравюра в одну краску, лежат в CellArt.tsx.
 
-   Цвета самой карты владений живут в :root и в тёмной теме не меняются: лист бумаги
-   остаётся листом бумаги, темнеет только стол вокруг него. */
+   Тем две, и переключает их кнопка, а не системная настройка: тема пишется атрибутом
+   data-theme на <html>, см. theme.ts. Цвета самой карты владений живут в :root и в
+   тёмной теме не меняются: лист бумаги остаётся листом бумаги, темнеет только стол
+   вокруг него. */
 
 :root {
   /* обвязка: пергамент и чернила */
@@ -46,24 +48,25 @@
   --cell: clamp(20px, min(7vw, 4.6vh), 38px);
 
   font: 17px/150% var(--serif);
-  color-scheme: light dark;
+  color-scheme: light;
   color: var(--ink);
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #1b1611;
-    --panel: #251e17;
-    --ink: #e9dbbd;
-    --ink-soft: #a8977a;
-    --rule: #4a3d2c;
-    --rule-hard: #6d5a3f;
-    --seal: #c2503c;
-    --gold: #c39b46;
-    --done: #7fa877;
-  }
+/* Ночная тема: тёмный стол, а лист на нём тот же. */
+:root[data-theme='dark'] {
+  --bg: #1b1611;
+  --panel: #251e17;
+  --ink: #e9dbbd;
+  --ink-soft: #a8977a;
+  --rule: #4a3d2c;
+  --rule-hard: #6d5a3f;
+  --seal: #c2503c;
+  --gold: #c39b46;
+  --done: #7fa877;
+
+  color-scheme: dark;
 }
 
 /* Пергамент неровный: два очень мягких пятна вместо картинки-текстуры. */
@@ -169,8 +172,22 @@ strong {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+}
+
+.topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   padding-bottom: 10px;
   border-bottom: 1px solid var(--rule);
+}
+
+/* Переключатель темы на экранах без верхней полосы. */
+.corner {
+  position: fixed;
+  top: 16px;
+  right: 20px;
+  z-index: 2;
 }
 
 .wordmark {

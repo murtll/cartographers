@@ -6,6 +6,7 @@ import { Countdown } from '../components/Countdown'
 import { InviteLink } from '../components/InviteLink'
 import { PlayerList } from '../components/PlayerList'
 import { TerrainPicker } from '../components/TerrainPicker'
+import { ThemeToggle } from '../components/ThemeToggle'
 import { BOARD_NAMES, PHASE_NAMES } from '../labels'
 import { STUB_BOARDS, stubSnapshot, stubSubmitMove } from '../stubs'
 import type { Terrain } from '../types'
@@ -43,9 +44,12 @@ export function Room({ code, nick, boardId }: Props) {
         <Link className="wordmark" to="/">
           Картографы
         </Link>
-        <Link className="button button--small" to="/">
-          Выйти
-        </Link>
+        <span className="topbar__actions">
+          <ThemeToggle />
+          <Link className="button button--small" to="/">
+            Выйти
+          </Link>
+        </span>
       </nav>
 
       <header className="room__head">

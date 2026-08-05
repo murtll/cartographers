@@ -1,10 +1,15 @@
 import { Link } from 'react-router'
 import { CompassRose } from '../components/CompassRose'
+import { ThemeToggle } from '../components/ThemeToggle'
 
 /** Титульная страница: отсюда либо ищем комнату по коду, либо созываем свою. */
 export function Home() {
   return (
     <section className="screen screen--center">
+      <div className="corner">
+        <ThemeToggle />
+      </div>
+
       <CompassRose />
 
       <h1 className="title">Картографы</h1>
