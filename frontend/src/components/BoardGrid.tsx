@@ -20,8 +20,14 @@ const MARK_CLASSES: Record<BoardCell, string> = {
 /** Подпись клетки для наведения и для скринридера. */
 function describe(mark: BoardCell, terrain: Terrain): string {
   const marked = mark === '.' ? [] : [CELL_NAMES[mark]]
-  const drawnOn = terrain === 'empty' ? 'свободна' : `нарисовано: ${TERRAIN_NAMES[terrain]}`
-  return [...marked, drawnOn].join(', ')
+
+  if (terrain !== 'empty') {
+    return [...marked, `нарисовано: ${TERRAIN_NAMES[terrain]}`].join(', ')
+  }
+
+  // Гора и ущелье заняты типографией. Руины — нет: они свободны, пока пусты.
+  const taken = mark === 'M' || mark === 'C'
+  return [...marked, taken ? 'занято' : 'свободно'].join(', ')
 }
 
 /**
