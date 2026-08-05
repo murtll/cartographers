@@ -2,8 +2,9 @@
    чем пролистать этот файл сверху вниз.
 
    Оформление — старая карта: пергамент, чернильные линии, серифный шрифт, красный
-   сургуч как единственный акцент. Отсюда правило: скруглений почти нет, тени не
-   размазываем, рамки рисуем в две линии, как на печатной карточке.
+   сургуч как единственный акцент. Отсюда правило: скругления мелкие, тени не
+   размазываем, рамки рисуем в две линии, как на печатной карточке. Рисунки в клетках —
+   гравюра в одну краску, лежат в CellArt.tsx.
 
    Цвета самой карты владений живут в :root и в тёмной теме не меняются: лист бумаги
    остаётся листом бумаги, темнеет только стол вокруг него. */
@@ -33,6 +34,7 @@
   --mountain-bg: #cdc1a5;
   --mountain-ink: #4d4133;
   --ruins-ink: #9a6b1f;
+  --ruins-stone: #6f5c3e;
   --chasm-bg: #7b7361;
   --chasm-ink: #2f2a20;
 
@@ -185,6 +187,7 @@ strong {
 .panel {
   background: var(--panel);
   border: 1px solid var(--rule-hard);
+  border-radius: 6px;
   box-shadow:
     0 0 0 3px var(--bg),
     0 0 0 4px var(--rule);
@@ -208,7 +211,7 @@ strong {
   color: var(--ink);
   background: var(--panel);
   border: 1px solid var(--rule-hard);
-  border-radius: 2px;
+  border-radius: 5px;
   padding: 9px 20px;
   text-decoration: none;
   cursor: pointer;
@@ -272,7 +275,7 @@ strong {
   color: var(--ink);
   background: var(--bg);
   border: 1px solid var(--rule-hard);
-  border-radius: 2px;
+  border-radius: 5px;
   padding: 9px 12px;
 }
 
@@ -325,6 +328,7 @@ strong {
   color: var(--ink);
   background: var(--panel);
   border: 1px solid var(--rule);
+  border-radius: 4px;
   padding: 3px 8px;
 }
 
@@ -429,6 +433,7 @@ strong {
   border: 2px solid var(--board-frame);
   outline: 1px solid var(--board-frame);
   outline-offset: 4px;
+  border-radius: 6px;
   width: max-content;
 }
 
@@ -438,8 +443,20 @@ strong {
   aspect-ratio: 1;
   padding: 0;
   border: 0;
+  border-radius: 3px;
   background: var(--paper);
   cursor: pointer;
+}
+
+/* Гравюра в клетке. Цвет берёт от клетки: на тёмной краске рисунок светлый, на светлой —
+   чернильный, иначе на маленькой клетке рисунка не разобрать. */
+.art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: var(--cell-ink);
+  pointer-events: none;
 }
 
 .cell:disabled {
@@ -461,10 +478,11 @@ strong {
   position: relative;
   flex: none;
   display: inline-block;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   background: var(--paper);
   border: 1px solid var(--board-frame);
+  border-radius: 3px;
 }
 
 /* Нарисованное игроком. */
@@ -473,31 +491,29 @@ strong {
 }
 .cell--forest {
   background: var(--forest);
+  --cell-ink: #e7dcc2;
 }
 .cell--village {
   background: var(--village);
+  --cell-ink: #f0e3c8;
 }
 .cell--water {
   background: var(--water);
+  --cell-ink: #e6e5d6;
 }
 .cell--farm {
   background: var(--farm);
+  --cell-ink: #3d2c0f;
 }
 .cell--monster {
   background: var(--monster);
+  --cell-ink: #ece0cd;
 }
 
 /* Гора: занята типографией, поверх не рисуют. */
 .cell--mountain {
   background: var(--mountain-bg);
-}
-
-.cell--mountain::after {
-  content: '';
-  position: absolute;
-  inset: 22%;
-  background: var(--mountain-ink);
-  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  --cell-ink: var(--mountain-ink);
 }
 
 /* Ущелье: дырка в планшете, тоже занято. */
@@ -516,13 +532,21 @@ strong {
   );
 }
 
-/* Руины: свободны, рисовать можно. Пунктир остаётся виден и после того, как на них
-   нарисовали, — иначе непонятно, куда игрок попал. */
-.cell--ruins::before {
+/* Руины: свободны, рисовать можно. Пока пусто — видно обломки колонн; как только на них
+   нарисовали, обломки прячутся под краской, а пунктир остаётся, иначе непонятно, куда
+   игрок попал. */
+/* Пока руины пусты, обломки чертим каменным; как только сверху легла краска, рисунок
+   местности берёт свой цвет — поэтому правило и привязано к пустой клетке. */
+.cell--ruins.cell--empty {
+  --cell-ink: var(--ruins-stone);
+}
+
+.cell--ruins:not(.cell--empty)::before {
   content: '';
   position: absolute;
-  inset: 15%;
+  inset: 12%;
   border: 2px dashed var(--ruins-ink);
+  border-radius: 3px;
 }
 
 .legend {
@@ -557,6 +581,7 @@ strong {
   padding: 14px;
   background: var(--panel);
   border: 1px solid var(--rule-hard);
+  border-radius: 6px;
   box-shadow:
     0 0 0 3px var(--bg),
     0 0 0 4px var(--rule);
@@ -584,7 +609,7 @@ strong {
   color: var(--ink);
   background: var(--bg);
   border: 1px solid var(--rule-hard);
-  border-radius: 2px;
+  border-radius: 5px;
   padding: 6px 12px;
   cursor: pointer;
 }
@@ -598,6 +623,28 @@ strong {
   box-shadow: inset 0 0 0 1px var(--seal);
 }
 
+/* Справка, раскрытая кликом по типу местности. */
+.hint {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--rule);
+  font-size: 15px;
+  line-height: 145%;
+  color: var(--ink-soft);
+}
+
+.hint__name {
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+
+.hint__label {
+  color: var(--ink);
+}
+
 /* --- игроки ------------------------------------------------------------------- */
 
 .players {
@@ -606,6 +653,7 @@ strong {
   padding: 0;
   background: var(--panel);
   border: 1px solid var(--rule-hard);
+  border-radius: 6px;
 }
 
 .players__item {
@@ -634,6 +682,7 @@ strong {
   letter-spacing: 0.1em;
   color: var(--seal);
   border: 1px solid var(--seal);
+  border-radius: 4px;
   padding: 1px 7px;
 }
 

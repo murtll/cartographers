@@ -1,6 +1,7 @@
 import { cellAt, isCellFree } from '../board'
 import { CELL_NAMES, TERRAIN_NAMES } from '../labels'
 import type { BoardCell, BoardLayout, Terrain } from '../types'
+import { CellArt } from './CellArt'
 
 type Props = {
   /** Разметка планшета: горы, руины, ущелья. За партию не меняется. */
@@ -57,7 +58,9 @@ export function BoardGrid({ layout, drawn, onDraw }: Props) {
               onClick={() => onDraw(row, col)}
               title={describe(mark, terrain)}
               aria-label={`строка ${row + 1}, столбец ${col + 1}: ${describe(mark, terrain)}`}
-            />
+            >
+              <CellArt mark={mark} terrain={terrain} />
+            </button>
           )
         }),
       )}
