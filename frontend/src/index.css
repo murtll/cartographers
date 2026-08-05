@@ -256,6 +256,17 @@ strong {
   padding: 4px 12px;
 }
 
+/* Кнопка-иконка: квадратная, без подписи — подпись живёт в aria-label. */
+.button--icon {
+  padding: 6px;
+}
+
+.theme-icon {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
 .button:disabled {
   opacity: 0.45;
   cursor: default;
