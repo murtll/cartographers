@@ -83,9 +83,10 @@ export function Room({ code, nick, boardId }: Props) {
         </ul>
       </header>
 
-      {/* Три колонки: карта ровно посередине страницы, счётчики и ход по краям. */}
+      {/* Три колонки: карта ровно посередине страницы, счётчики и ход по краям. Когда
+          колонки складываются в одну, порядок задаёт css: сначала карта, потом ход. */}
       <div className="room__body">
-        <aside className="room__col">
+        <aside className="room__col room__col--info">
           <h2>Игроки</h2>
           <PlayerList players={snapshot.players} you={snapshot.you} />
 
@@ -97,7 +98,7 @@ export function Room({ code, nick, boardId }: Props) {
           <BoardGrid layout={layout} drawn={board.drawn} onDraw={draw} />
         </div>
 
-        <aside className="room__col">
+        <aside className="room__col room__col--move">
           <h2>Ход</h2>
           <TerrainPicker options={snapshot.options} active={active} onPick={setPicked} />
           <p className="note">
