@@ -24,8 +24,8 @@ const TITLES = {
 /**
  * Вход в комнату: код и ник.
  *
- * Сторону планшета выбираем только при создании: у чужой комнаты она уже выбрана и
- * приедет со снапшотом в поле `board_id`.
+ * Планшет выбираем только при создании: у чужой комнаты он уже выбран и приедет со
+ * снапшотом в поле `board_id`.
  */
 export function JoinRoom({ mode, initialCode = '', onSubmit }: Props) {
   const [code, setCode] = useState(initialCode)
@@ -83,7 +83,7 @@ export function JoinRoom({ mode, initialCode = '', onSubmit }: Props) {
 
         {mode === 'create' ? (
           <fieldset className="field">
-            <legend>Сторона планшета</legend>
+            <legend>Планшет</legend>
             {Object.keys(STUB_BOARDS).map((id) => (
               <label key={id} className="radio">
                 <input

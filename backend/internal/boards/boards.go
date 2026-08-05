@@ -14,7 +14,7 @@ const (
 	CellPlain    Cell = 0 // рисовать можно
 	CellMountain Cell = 1 // нельзя, но даёт монету когда окружена
 	CellRuins    Cell = 2 // рисовать можно; до этого считается незаполненной
-	CellChasm    Cell = 3 // нельзя, только на стороне Б
+	CellChasm    Cell = 3 // нельзя; есть не на всех планшетах
 )
 
 const (

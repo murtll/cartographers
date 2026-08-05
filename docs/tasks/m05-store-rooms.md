@@ -210,6 +210,6 @@ if pgErr.Code == "23505" { return ErrSeqTaken }
 - Вторая половина пакета: [m05-store-events.md](m05-store-events.md)
 - Кто эти методы вызывает: [m05-room-actor.md](m05-room-actor.md),
   [m05-http-api.md](m05-http-api.md)
-- Что за `board_id` и почему сторона выбирается одна на всех:
+- Что за `board_id` и почему планшет выбирается один на всех:
   [game-rules.md](../game-rules.md)
 - Как поднять базу и гонять тесты: [local-setup.md](../local-setup.md)

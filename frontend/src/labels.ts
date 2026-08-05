@@ -19,10 +19,10 @@ export const CELL_NAMES: Record<BoardCell, string> = {
   C: 'ущелье',
 }
 
-/** Стороны планшета. Ключ — `board_id`, вторая сторона в правилах кириллическая «Б». */
+/** Планшеты. Ключ — `board_id`; со временем их станет больше. */
 export const BOARD_NAMES: Record<string, string> = {
-  wildlands: 'Дикие земли (A)',
-  wasteland: 'Пустошь (Б)',
+  wildlands: 'Дикие земли',
+  wasteland: 'Пустошь',
 }
 
 /** Фигуры. В M0.5 сервер присылает только `single`. */

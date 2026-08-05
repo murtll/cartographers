@@ -9,7 +9,7 @@
 
 import type { BoardLayout, MoveOption, Snapshot, Terrain } from './types'
 
-/** Копии `backend/internal/boards/*.json` — по файлу на сторону планшета. */
+/** Копии `backend/internal/boards/*.json` — по файлу на планшет. */
 export const STUB_BOARDS: Record<string, BoardLayout> = {
   wildlands: {
     id: 'wildlands',
@@ -47,7 +47,7 @@ export const STUB_BOARDS: Record<string, BoardLayout> = {
   },
 }
 
-/** Идентификатор стороны по умолчанию — той, что в примере снапшота. */
+/** Планшет по умолчанию — тот, что в примере снапшота. */
 export const DEFAULT_BOARD_ID = 'wildlands'
 
 /** Сколько сервер даёт на ход. */
@@ -80,20 +80,20 @@ function deadlineIn(seconds: number): string {
 }
 
 /**
- * Какая сторона планшета у какой комнаты.
+ * На каком планшете играет какая комната.
  *
- * На сервере сторона — часть комнаты: её выбирают при создании, и она приезжает в
- * снапшоте полем `board_id`. Заглушка помнит выбор только в памяти страницы, поэтому
- * по свежей ссылке-приглашению сторона будет стороной по умолчанию.
+ * На сервере планшет — часть комнаты: его выбирают при создании, и он приезжает в
+ * снапшоте полем `board_id`. Заглушка помнит выбор только в памяти страницы, поэтому по
+ * свежей ссылке-приглашению планшет будет планшетом по умолчанию.
  */
-const roomSides = new Map<string, string>()
+const roomBoards = new Map<string, string>()
 
-export function stubRememberSide(code: string, boardId: string): void {
-  roomSides.set(code, boardId)
+export function stubRememberBoard(code: string, boardId: string): void {
+  roomBoards.set(code, boardId)
 }
 
-export function stubSideFor(code: string): string {
-  return roomSides.get(code) ?? DEFAULT_BOARD_ID
+export function stubBoardFor(code: string): string {
+  return roomBoards.get(code) ?? DEFAULT_BOARD_ID
 }
 
 /** Код комнаты. На сервере его выдаёт комната при создании. */

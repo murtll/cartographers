@@ -4,14 +4,14 @@ import { readNick, saveNick } from './nick'
 import { Home } from './screens/Home'
 import { JoinRoom } from './screens/JoinRoom'
 import { Room } from './screens/Room'
-import { stubRememberSide, stubRoomCode, stubSideFor } from './stubs'
+import { stubBoardFor, stubRememberBoard, stubRoomCode } from './stubs'
 
 /**
  * Адреса приложения:
  *
  *   /            главная
  *   /join        вход по коду комнаты
- *   /create      своя комната: код, ник, сторона планшета
+ *   /create      своя комната: код, ник, планшет
  *   /room/:code  комната — этой ссылкой и зовут игроков
  *
  * Код комнаты живёт в пути, поэтому ссылку можно просто отдать другому человеку.
@@ -56,7 +56,7 @@ function CreateRoute() {
       initialCode={code}
       onSubmit={(chosenCode, nick, boardId) => {
         saveNick(nick)
-        stubRememberSide(chosenCode, boardId)
+        stubRememberBoard(chosenCode, boardId)
         navigate(`/room/${chosenCode}`)
       }}
     />
@@ -91,5 +91,5 @@ function RoomRoute() {
     )
   }
 
-  return <Room code={roomCode} nick={nick} boardId={stubSideFor(roomCode)} />
+  return <Room code={roomCode} nick={nick} boardId={stubBoardFor(roomCode)} />
 }
