@@ -1,59 +1,95 @@
 import { useState } from 'react'
+import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router'
+import { readNick, saveNick } from './nick'
 import { Home } from './screens/Home'
 import { JoinRoom } from './screens/JoinRoom'
 import { Room } from './screens/Room'
-import { stubRoomCode } from './stubs'
+import { stubRememberSide, stubRoomCode, stubSideFor } from './stubs'
 
 /**
- * Какой экран открыт. Данные экрана лежат рядом с его именем, поэтому «комната без
- * кода» просто не собирается.
- */
-type Screen =
-  | { name: 'home' }
-  | { name: 'join'; mode: 'create' | 'find'; code: string }
-  | { name: 'room'; code: string; nick: string; boardId: string }
-
-/**
- * Навигация состоянием, без роутера.
+ * Адреса приложения:
  *
- * Экрана три, переходы линейные: главная → вход → комната. Роутер понадобится, когда
- * появится ссылка-приглашение в комнату, — вот тогда его и добавим, вместе с адресами,
- * которые есть смысл открывать напрямую.
+ *   /            главная
+ *   /join        вход по коду комнаты
+ *   /create      своя комната: код, ник, сторона планшета
+ *   /room/:code  комната — этой ссылкой и зовут игроков
+ *
+ * Код комнаты живёт в пути, поэтому ссылку можно просто отдать другому человеку.
+ * Экраны про адреса не знают: маршруты разбираются здесь и передают вниз готовые
+ * значения.
  */
 export default function App() {
-  const [screen, setScreen] = useState<Screen>({ name: 'home' })
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/join" element={<FindRoute />} />
+      <Route path="/create" element={<CreateRoute />} />
+      <Route path="/room/:code" element={<RoomRoute />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  )
+}
 
-  switch (screen.name) {
-    case 'home':
-      return (
-        <Home
-          onFind={() => setScreen({ name: 'join', mode: 'find', code: '' })}
-          onCreate={() =>
-            setScreen({ name: 'join', mode: 'create', code: stubRoomCode() })
-          }
-        />
-      )
+/** Вход в чужую комнату: код игрок вводит руками. */
+function FindRoute() {
+  const navigate = useNavigate()
 
-    case 'join':
-      return (
-        <JoinRoom
-          mode={screen.mode}
-          initialCode={screen.code}
-          onEnter={(code, nick, boardId) =>
-            setScreen({ name: 'room', code, nick, boardId })
-          }
-          onBack={() => setScreen({ name: 'home' })}
-        />
-      )
+  return (
+    <JoinRoom
+      mode="find"
+      onSubmit={(code, nick) => {
+        saveNick(nick)
+        navigate(`/room/${code}`)
+      }}
+    />
+  )
+}
 
-    case 'room':
-      return (
-        <Room
-          code={screen.code}
-          nick={screen.nick}
-          boardId={screen.boardId}
-          onLeave={() => setScreen({ name: 'home' })}
-        />
-      )
+/** Своя комната. Код на сервере выдаёт комната, поэтому он тут уже готовый. */
+function CreateRoute() {
+  const navigate = useNavigate()
+  const [code] = useState(stubRoomCode)
+
+  return (
+    <JoinRoom
+      mode="create"
+      initialCode={code}
+      onSubmit={(chosenCode, nick, boardId) => {
+        saveNick(nick)
+        stubRememberSide(chosenCode, boardId)
+        navigate(`/room/${chosenCode}`)
+      }}
+    />
+  )
+}
+
+/**
+ * Комната по ссылке. Код в адресе есть всегда, а ника у пришедшего по ссылке может и не
+ * быть — тогда сначала спрашиваем имя, никуда не уходя с адреса комнаты.
+ */
+function RoomRoute() {
+  const { code = '' } = useParams()
+  const [nick, setNick] = useState(readNick)
+  const roomCode = code.toUpperCase()
+
+  // Код в адресе приводим к одному виду, чтобы ссылка из строки браузера совпадала с
+  // той, которой зовут игроков.
+  if (code !== roomCode) {
+    return <Navigate to={`/room/${roomCode}`} replace />
   }
+
+  if (nick === '') {
+    return (
+      <JoinRoom
+        mode="invited"
+        initialCode={roomCode}
+        onSubmit={(_code, chosenNick) => {
+          saveNick(chosenNick)
+          setNick(chosenNick)
+        }}
+      />
+    )
+  }
+
+  return <Room code={roomCode} nick={nick} boardId={stubSideFor(roomCode)} />
 }

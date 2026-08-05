@@ -79,6 +79,23 @@ function deadlineIn(seconds: number): string {
   return new Date(Date.now() + seconds * 1000).toISOString()
 }
 
+/**
+ * Какая сторона планшета у какой комнаты.
+ *
+ * На сервере сторона — часть комнаты: её выбирают при создании, и она приезжает в
+ * снапшоте полем `board_id`. Заглушка помнит выбор только в памяти страницы, поэтому
+ * по свежей ссылке-приглашению сторона будет стороной по умолчанию.
+ */
+const roomSides = new Map<string, string>()
+
+export function stubRememberSide(code: string, boardId: string): void {
+  roomSides.set(code, boardId)
+}
+
+export function stubSideFor(code: string): string {
+  return roomSides.get(code) ?? DEFAULT_BOARD_ID
+}
+
 /** Код комнаты. На сервере его выдаёт комната при создании. */
 export function stubRoomCode(): string {
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'

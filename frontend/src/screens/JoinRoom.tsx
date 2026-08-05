@@ -1,14 +1,24 @@
 import { useState } from 'react'
+import { Link } from 'react-router'
 import { BOARD_NAMES } from '../labels'
+import { readNick } from '../nick'
 import { DEFAULT_BOARD_ID, STUB_BOARDS } from '../stubs'
 
 type Props = {
-  /** `create` — комнату создаём сами, `find` — входим в чужую по коду. */
-  mode: 'create' | 'find'
-  /** Код, который уже известен: при создании комнаты его выдаёт сервер. */
-  initialCode: string
-  onEnter: (code: string, nick: string, boardId: string) => void
-  onBack: () => void
+  /**
+   * `find` — входим в чужую комнату по коду, `create` — созываем свою,
+   * `invited` — пришли по ссылке, код уже в адресе и спросить надо только имя.
+   */
+  mode: 'find' | 'create' | 'invited'
+  /** Код, который уже известен: сгенерированный или взятый из адреса. */
+  initialCode?: string
+  onSubmit: (code: string, nick: string, boardId: string) => void
+}
+
+const TITLES = {
+  find: 'Найти комнату',
+  create: 'Создать комнату',
+  invited: 'Тебя позвали за стол',
 }
 
 /**
@@ -17,38 +27,46 @@ type Props = {
  * Сторону планшета выбираем только при создании: у чужой комнаты она уже выбрана и
  * приедет со снапшотом в поле `board_id`.
  */
-export function JoinRoom({ mode, initialCode, onEnter, onBack }: Props) {
+export function JoinRoom({ mode, initialCode = '', onSubmit }: Props) {
   const [code, setCode] = useState(initialCode)
-  const [nick, setNick] = useState('')
+  const [nick, setNick] = useState(readNick)
   const [boardId, setBoardId] = useState(DEFAULT_BOARD_ID)
 
   const ready = code.trim().length > 0 && nick.trim().length > 0
 
   return (
     <section className="screen screen--center">
-      <h1>{mode === 'create' ? 'Создать комнату' : 'Найти комнату'}</h1>
+      <h1 className="title">{TITLES[mode]}</h1>
+
+      {mode === 'invited' ? (
+        <p className="lead">
+          Комната <strong>{initialCode}</strong>. Напиши, как тебя записать в свиток.
+        </p>
+      ) : null}
 
       <form
-        className="form"
+        className="form panel"
         onSubmit={(event) => {
           event.preventDefault()
           if (ready) {
-            onEnter(code.trim().toUpperCase(), nick.trim(), boardId)
+            onSubmit(code.trim().toUpperCase(), nick.trim(), boardId)
           }
         }}
       >
-        <label className="field">
-          Код комнаты
-          <input
-            className="input"
-            value={code}
-            onChange={(event) => setCode(event.target.value.toUpperCase())}
-            placeholder="ABC123"
-            maxLength={12}
-            autoComplete="off"
-            autoFocus={mode === 'find'}
-          />
-        </label>
+        {mode === 'invited' ? null : (
+          <label className="field">
+            Код комнаты
+            <input
+              className="input"
+              value={code}
+              onChange={(event) => setCode(event.target.value.toUpperCase())}
+              placeholder="ABC123"
+              maxLength={12}
+              autoComplete="off"
+              autoFocus={mode === 'find'}
+            />
+          </label>
+        )}
 
         <label className="field">
           Ник
@@ -59,7 +77,7 @@ export function JoinRoom({ mode, initialCode, onEnter, onBack }: Props) {
             placeholder="Ваня"
             maxLength={24}
             autoComplete="off"
-            autoFocus={mode === 'create'}
+            autoFocus={mode !== 'find'}
           />
         </label>
 
@@ -83,11 +101,11 @@ export function JoinRoom({ mode, initialCode, onEnter, onBack }: Props) {
 
         <div className="actions">
           <button type="submit" className="button button--main" disabled={!ready}>
-            Войти
+            {mode === 'invited' ? 'За стол' : 'Войти'}
           </button>
-          <button type="button" className="button" onClick={onBack}>
+          <Link className="button" to="/">
             Назад
-          </button>
+          </Link>
         </div>
       </form>
     </section>

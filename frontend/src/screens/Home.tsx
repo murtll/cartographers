@@ -1,25 +1,28 @@
-type Props = {
-  onFind: () => void
-  onCreate: () => void
-}
+import { Link } from 'react-router'
+import { CompassRose } from '../components/CompassRose'
 
-/** Первый экран: отсюда либо ищем комнату по коду, либо создаём свою. */
-export function Home({ onFind, onCreate }: Props) {
+/** Титульная страница: отсюда либо ищем комнату по коду, либо созываем свою. */
+export function Home() {
   return (
     <section className="screen screen--center">
-      <h1>Картографы</h1>
+      <CompassRose />
+
+      <h1 className="title">Картографы</h1>
+
       <p className="lead">
         Рисуем карту владений на сетке 11×11: лес, поселения, водоёмы, поля. Горы и
-        ущелья уже стоят на планшете, руины ждут, пока на них нарисуют.
+        ущелья на планшете уже стоят, руины ждут, пока на них нарисуют.
       </p>
+
       <div className="actions">
-        <button type="button" className="button button--main" onClick={onFind}>
+        <Link className="button button--main" to="/join">
           Найти комнату
-        </button>
-        <button type="button" className="button" onClick={onCreate}>
+        </Link>
+        <Link className="button" to="/create">
           Создать комнату
-        </button>
+        </Link>
       </div>
+
       <p className="note">
         Каркас на заглушках: сервера в этой сборке нет, данные выдуманы.
       </p>

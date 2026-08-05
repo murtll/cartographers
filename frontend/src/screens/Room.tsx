@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { Link } from 'react-router'
 import { BoardGrid } from '../components/BoardGrid'
 import { BoardLegend } from '../components/BoardLegend'
 import { Countdown } from '../components/Countdown'
+import { InviteLink } from '../components/InviteLink'
 import { PlayerList } from '../components/PlayerList'
 import { TerrainPicker } from '../components/TerrainPicker'
 import { BOARD_NAMES, PHASE_NAMES } from '../labels'
@@ -12,17 +14,16 @@ type Props = {
   code: string
   nick: string
   boardId: string
-  onLeave: () => void
 }
 
-/** Комната: карта владений, счётчики и варианты хода. */
-export function Room({ code, nick, boardId, onLeave }: Props) {
+/** Комната: карта владений в середине стола, счётчики и варианты хода по сторонам. */
+export function Room({ code, nick, boardId }: Props) {
   // Настоящее состояние приедет потоком событий: сервер присылает снапшот целиком на
   // каждое изменение, а браузер просто рисует последний.
   const [snapshot, setSnapshot] = useState(() => stubSnapshot(nick, boardId))
 
-  // Что игрок выбрал в вариантах хода. Карта раунда меняется, поэтому выбор
-  // проверяем на актуальность, а не чиним эффектом.
+  // Что игрок выбрал в вариантах хода. Карта раунда меняется, поэтому выбор проверяем
+  // на актуальность, а не чиним эффектом.
   const [picked, setPicked] = useState<Terrain | null>(null)
 
   // Разметка планшета приезжает отдельным запросом и за партию не меняется.
@@ -38,10 +39,20 @@ export function Room({ code, nick, boardId, onLeave }: Props) {
 
   return (
     <section className="screen">
+      <nav className="topbar">
+        <Link className="wordmark" to="/">
+          Картографы
+        </Link>
+        <Link className="button button--small" to="/">
+          Выйти
+        </Link>
+      </nav>
+
       <header className="room__head">
-        <div>
-          <h1 className="room__title">Комната {code}</h1>
-          <p className="note">{BOARD_NAMES[snapshot.board_id] ?? layout.name}</p>
+        <h1 className="title title--small">Комната {code}</h1>
+        <div className="room__meta">
+          <span className="note">{BOARD_NAMES[snapshot.board_id] ?? layout.name}</span>
+          <InviteLink code={code} />
         </div>
 
         <ul className="stats">
@@ -70,28 +81,29 @@ export function Room({ code, nick, boardId, onLeave }: Props) {
             <span className="stats__value">{snapshot.deck_remaining}</span>
           </li>
         </ul>
-
-        <button type="button" className="button" onClick={onLeave}>
-          Выйти
-        </button>
       </header>
 
+      {/* Три колонки: карта ровно посередине страницы, счётчики и ход по краям. */}
       <div className="room__body">
-        <div className="room__board">
-          <BoardGrid layout={layout} drawn={board.drawn} onDraw={draw} />
+        <aside className="room__col">
+          <h2>Игроки</h2>
+          <PlayerList players={snapshot.players} you={snapshot.you} />
+
+          <h2>Разметка</h2>
           <BoardLegend />
+        </aside>
+
+        <div className="room__map">
+          <BoardGrid layout={layout} drawn={board.drawn} onDraw={draw} />
         </div>
 
-        <aside className="room__side">
+        <aside className="room__col">
           <h2>Ход</h2>
           <TerrainPicker options={snapshot.options} active={active} onPick={setPicked} />
           <p className="note">
             Выбери тип местности и кликни по свободной клетке. Фигура в M0.5 всегда из
             одной клетки.
           </p>
-
-          <h2>Игроки</h2>
-          <PlayerList players={snapshot.players} you={snapshot.you} />
         </aside>
       </div>
     </section>
