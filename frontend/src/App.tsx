@@ -1,122 +1,95 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router'
+import { readNick, saveNick } from './nick'
+import { Home } from './screens/Home'
+import { JoinRoom } from './screens/JoinRoom'
+import { Room } from './screens/Room'
+import { stubBoardFor, stubRememberBoard, stubRoomCode } from './stubs'
 
-function App() {
-  const [count, setCount] = useState(0)
-
+/**
+ * Адреса приложения:
+ *
+ *   /            главная
+ *   /join        вход по коду комнаты
+ *   /create      своя комната: код, ник, планшет
+ *   /room/:code  комната — этой ссылкой и зовут игроков
+ *
+ * Код комнаты живёт в пути, поэтому ссылку можно просто отдать другому человеку.
+ * Экраны про адреса не знают: маршруты разбираются здесь и передают вниз готовые
+ * значения.
+ */
+export default function App() {
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/join" element={<FindRoute />} />
+      <Route path="/create" element={<CreateRoute />} />
+      <Route path="/room/:code" element={<RoomRoute />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   )
 }
 
-export default App
+/** Вход в чужую комнату: код игрок вводит руками. */
+function FindRoute() {
+  const navigate = useNavigate()
+
+  return (
+    <JoinRoom
+      mode="find"
+      onSubmit={(code, nick) => {
+        saveNick(nick)
+        navigate(`/room/${code}`)
+      }}
+    />
+  )
+}
+
+/** Своя комната. Код на сервере выдаёт комната, поэтому он тут уже готовый. */
+function CreateRoute() {
+  const navigate = useNavigate()
+  const [code] = useState(stubRoomCode)
+
+  return (
+    <JoinRoom
+      mode="create"
+      initialCode={code}
+      onSubmit={(chosenCode, nick, boardId) => {
+        saveNick(nick)
+        stubRememberBoard(chosenCode, boardId)
+        navigate(`/room/${chosenCode}`)
+      }}
+    />
+  )
+}
+
+/**
+ * Комната по ссылке. Код в адресе есть всегда, а ника у пришедшего по ссылке может и не
+ * быть — тогда сначала спрашиваем имя, никуда не уходя с адреса комнаты.
+ */
+function RoomRoute() {
+  const { code = '' } = useParams()
+  const [nick, setNick] = useState(readNick)
+  const roomCode = code.toUpperCase()
+
+  // Код в адресе приводим к одному виду, чтобы ссылка из строки браузера совпадала с
+  // той, которой зовут игроков.
+  if (code !== roomCode) {
+    return <Navigate to={`/room/${roomCode}`} replace />
+  }
+
+  if (nick === '') {
+    return (
+      <JoinRoom
+        mode="invited"
+        initialCode={roomCode}
+        onSubmit={(_code, chosenNick) => {
+          saveNick(chosenNick)
+          setNick(chosenNick)
+        }}
+      />
+    )
+  }
+
+  return <Room code={roomCode} nick={nick} boardId={stubBoardFor(roomCode)} />
+}

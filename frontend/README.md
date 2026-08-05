@@ -1,32 +1,50 @@
-# React + TypeScript + Vite
+# Браузерная часть
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React + TypeScript на Vite, линтер oxlint. Как поднять окружение целиком — в
+[docs/local-setup.md](../docs/local-setup.md).
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```sh
+npm install
+npm run dev      # http://localhost:5173
+npm run lint
+npm run build
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Если `npm run dev` падает с `sh: vite: command not found`, значит `node_modules` — пустая
+точка монтирования docker-тома, а зависимости лежат внутри контейнера. Либо работать
+через `docker compose up`, либо погасить контейнер и поставить зависимости локально.
+
+## Адреса
+
+```
+/            главная
+/join        вход по коду комнаты
+/create      своя комната: код, ник, планшет
+/room/:code  комната — этой ссылкой и зовут игроков
+```
+
+Код комнаты стоит в пути, поэтому ссылку можно просто переслать. Пришедший по ссылке
+вводит только ник — он запоминается в браузере, так что перезагрузка не выкидывает из
+комнаты.
+
+Адреса настоящие, а не хэши, значит при раздаче собранных файлов сервер должен отдавать
+`index.html` на любой путь. `npm run dev` и `vite preview` так и делают сами.
+
+## Что где лежит
+
+```
+src/
+├── App.tsx          адреса: какой экран на каком пути
+├── stubs.ts         выдуманные данные — единственный файл, который заменит сервер
+├── types.ts         формы данных с сервера: снапшот и разметка планшета
+├── labels.ts        русские подписи к идентификаторам из данных
+├── board.ts         работа с сеткой: символ разметки, свободна ли клетка
+├── nick.ts          ник игрока, запомненный браузером
+├── index.css        все стили
+├── screens/         главная, вход в комнату, комната
+└── components/      карта владений, отсчёт, варианты хода, игроки
+```
+
+Сервера пока нет: разметку планшета браузер будет забирать один раз через
+`GET /api/boards/{id}`, состояние партии — потоком событий. До тех пор и то и другое
+приезжает из `stubs.ts`.
