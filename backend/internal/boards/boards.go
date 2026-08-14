@@ -113,3 +113,7 @@ func parseBoard(gs []string) (Grid, error) {
 	}
 	return grid, nil
 }
+
+func GetBoard(id string) Board {
+	return boards[id]
+}

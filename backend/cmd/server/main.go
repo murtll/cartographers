@@ -15,6 +15,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/murtll/cartographers/backend/internal/api"
 	"github.com/murtll/cartographers/backend/internal/boards"
 )
 
@@ -28,7 +29,7 @@ func main() {
 
 	addr := ":" + env("PORT", "8080")
 
-	mux := http.NewServeMux()
+	mux := api.NewRouter()
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		if _, err := w.Write([]byte(`{"status":"ok"}`)); err != nil {
