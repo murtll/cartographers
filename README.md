@@ -16,10 +16,7 @@ Go-бэкенд, React-фронтенд, монорепа.
 cp .env.example .env
 docker compose up
 ```
-
-- Фронт — <http://localhost:5173>
-- Проба бэка — <http://localhost:8080/healthz>
-- postgres — `localhost:5432`
+Игра откроется на <http://localhost:5173>
 
 Подробнее:
 [docs/local-setup.md](docs/local-setup.md).
