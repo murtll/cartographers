@@ -9,14 +9,6 @@ import (
 	"github.com/murtll/cartographers/backend/internal/boards"
 )
 
-/*
-POST /api/rooms                 создать комнату, вернуть код
-POST /api/rooms/{code}/join     ник → cookie с местом игрока !Должен принимать POST request body в формате json
-GET  /api/rooms/{code}/stream   SSE: поток снапшотов
-POST /api/rooms/{code}/moves    отправить ход
-GET  /api/boards/{id}           разметка планшета
-*/
-
 func NewRouter() *chi.Mux {
 	mux := chi.NewRouter()
 

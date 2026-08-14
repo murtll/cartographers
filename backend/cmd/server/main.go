@@ -30,12 +30,6 @@ func main() {
 	addr := ":" + env("PORT", "8080")
 
 	mux := api.NewRouter()
-	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		if _, err := w.Write([]byte(`{"status":"ok"}`)); err != nil {
-			log.Error("failed to sent request back to client")
-		}
-	})
 
 	srv := &http.Server{
 		Addr:              addr,
@@ -58,15 +52,44 @@ func main() {
 		}
 	}()
 
+	healthzaddr := ":" + env("PORT", "9090")
+
+	healthzmux := api.HealthzRouter()
+
+	healthzsrv := &http.Server{
+		Addr:              healthzaddr,
+		Handler:           healthzmux,
+		ReadHeaderTimeout: 5 * time.Second,
+	}
+
+	go func() {
+		log.Info("server listening", "healthzaddr", healthzaddr)
+		if err := healthzsrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Error("listen failed", "err", err)
+			os.Exit(1)
+		}
+	}()
+
 	<-ctx.Done()
 	log.Info("shutting down")
+	log.Info("healthz shutting down")
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(shutdownCtx); err != nil {
 		log.Error("shutdown failed", "err", err)
 	}
+
+	healthzShutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := healthzsrv.Shutdown(healthzShutdownCtx); err != nil {
+		log.Error("healthz shutdown failed", "err", err)
+	}
+
 }
+
+// TODO написать функуию для упрашения запуска муксов что бы код не повторялся линшний раз
+// func getmux(log *slog.Logger, ctx context.Context, )
 
 func env(key, fallback string) string {
 	if v := os.Getenv(key); v != "" {
