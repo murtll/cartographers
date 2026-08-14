@@ -114,6 +114,10 @@ func parseBoard(gs []string) (Grid, error) {
 	return grid, nil
 }
 
-func GetBoard(id string) Board {
-	return boards[id]
+func GetBoard(id string) (Board, error) {
+	board, ok := boards[id]
+	if ok {
+		return board, nil
+	}
+	return board, errors.New("unknown boards ID")
 }

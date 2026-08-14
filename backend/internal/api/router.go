@@ -82,5 +82,11 @@ func move(w http.ResponseWriter, r *http.Request) {
 
 func getBoard(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	Send(w, http.StatusOK, boards.GetBoard(id))
+	board, err := boards.GetBoard(id)
+	if err != nil {
+		Send(w, http.StatusBadRequest, NewErrorRessponse(err))
+		return
+	}
+
+	Send(w, http.StatusOK, board)
 }
