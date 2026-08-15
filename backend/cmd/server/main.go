@@ -37,6 +37,9 @@ func main() {
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
 	// WriteTimeout здесь нет намеренно: стрим событий висит открытым всю партию,
 	// и общий таймаут на запись его бы обрывал. Сроки на отдельные запросы
 	// ставят сами ручки.
@@ -44,13 +47,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	go func() {
-		log.Info("server listening", "addr", addr)
-		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Error("listen failed", "err", err)
-			os.Exit(1)
-		}
-	}()
+	go getmux(log, srv, shutdownCtx)
 
 	healthzaddr := ":" + env("PORT", "9090")
 
@@ -62,34 +59,27 @@ func main() {
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
-	go func() {
-		log.Info("server listening", "healthzaddr", healthzaddr)
-		if err := healthzsrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Error("listen failed", "err", err)
-			os.Exit(1)
-		}
-	}()
+	healthzShutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	go getmux(log, healthzsrv, healthzShutdownCtx)
 
 	<-ctx.Done()
 	log.Info("shutting down")
 	log.Info("healthz shutting down")
-
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	if err := srv.Shutdown(shutdownCtx); err != nil {
-		log.Error("shutdown failed", "err", err)
-	}
-
-	healthzShutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	if err := healthzsrv.Shutdown(healthzShutdownCtx); err != nil {
-		log.Error("healthz shutdown failed", "err", err)
-	}
-
 }
 
-// TODO написать функуию для упрашения запуска муксов что бы код не повторялся линшний раз
-// func getmux(log *slog.Logger, ctx context.Context, )
+func getmux(log *slog.Logger, srv *http.Server, shutdownCtx context.Context) {
+	log.Info("server listening", "healthzaddr", srv.Addr)
+	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		log.Error("listen failed", "err", err)
+		os.Exit(1)
+	}
+
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		log.Error("healthz shutdown failed", "err", err)
+	}
+}
 
 func env(key, fallback string) string {
 	if v := os.Getenv(key); v != "" {
