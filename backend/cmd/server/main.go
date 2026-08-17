@@ -15,6 +15,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/murtll/cartographers/backend/internal/api"
 	"github.com/murtll/cartographers/backend/internal/boards"
 )
 
@@ -27,43 +28,56 @@ func main() {
 	}
 
 	addr := ":" + env("PORT", "8080")
+	healthzaddr := ":" + env("HEALTHZ_PORT", "9090")
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		if _, err := w.Write([]byte(`{"status":"ok"}`)); err != nil {
-			log.Error("failed to sent request back to client")
-		}
-	})
-
-	srv := &http.Server{
-		Addr:              addr,
-		Handler:           mux,
-		ReadHeaderTimeout: 5 * time.Second,
+	// WriteTimeout здесь пока что нет намеренно с рассчетом на SSE
+	// тк он долго держит запрос открытым
+	// TODO: выделить SSE в отдельный сервер на отдельном роутере
+	// и только у него не будет таймаутов
+	// надо поресерчить чем будет плох такой подход
+	servers := map[string]*http.Server{
+		"main": {
+			Addr:              addr,
+			Handler:           api.NewRouter(),
+			ReadHeaderTimeout: 5 * time.Second,
+		},
+		"healthz": {
+			Addr:              healthzaddr,
+			Handler:           api.HealthzRouter(),
+			ReadHeaderTimeout: 5 * time.Second,
+			WriteTimeout:      10 * time.Second,
+		},
 	}
-
-	// WriteTimeout здесь нет намеренно: стрим событий висит открытым всю партию,
-	// и общий таймаут на запись его бы обрывал. Сроки на отдельные запросы
-	// ставят сами ручки.
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	go func() {
-		log.Info("server listening", "addr", addr)
-		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+	errCh := make(chan error, len(servers))
+	for name, srv := range servers {
+		go func() {
+			log.Info("server listening", "server", name, "addr", srv.Addr)
+			errCh <- srv.ListenAndServe()
+		}()
+	}
+
+	select {
+	case <-ctx.Done():
+		log.Info("shutting down")
+	case err := <-errCh:
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Error("listen failed", "err", err)
 			os.Exit(1)
 		}
-	}()
+		return
+	}
 
-	<-ctx.Done()
-	log.Info("shutting down")
-
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	if err := srv.Shutdown(shutdownCtx); err != nil {
-		log.Error("shutdown failed", "err", err)
+	for name, srv := range servers {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		log.Info("shutting down server", "server", name, "addr", srv.Addr)
+		if err := srv.Shutdown(shutdownCtx); err != nil {
+			log.Error("shutdown failed", "addr", srv.Addr, "err", err)
+		}
 	}
 }
 
