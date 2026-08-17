@@ -28,56 +28,55 @@ func main() {
 	}
 
 	addr := ":" + env("PORT", "8080")
+	healthzaddr := ":" + env("HEALTHZ_PORT", "9090")
 
-	mux := api.NewRouter()
-
-	srv := &http.Server{
-		Addr:              addr,
-		Handler:           mux,
-		ReadHeaderTimeout: 5 * time.Second,
+	// WriteTimeout здесь пока что нет намеренно с рассчетом на SSE
+	// тк он долго держит запрос открытым
+	// TODO: выделить SSE в отдельный сервер на отдельном роутере
+	// и только у него не будет таймаутов
+	// надо поресерчить чем будет плох такой подход
+	servers := map[string]*http.Server{
+		"main": {
+			Addr:              addr,
+			Handler:           api.NewRouter(),
+			ReadHeaderTimeout: 5 * time.Second,
+		},
+		"healthz": {
+			Addr:              healthzaddr,
+			Handler:           api.HealthzRouter(),
+			ReadHeaderTimeout: 5 * time.Second,
+		},
 	}
-
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	// WriteTimeout здесь нет намеренно: стрим событий висит открытым всю партию,
-	// и общий таймаут на запись его бы обрывал. Сроки на отдельные запросы
-	// ставят сами ручки.
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	go getmux(log, srv, shutdownCtx)
-
-	healthzaddr := ":" + env("PORT", "9090")
-
-	healthzmux := api.HealthzRouter()
-
-	healthzsrv := &http.Server{
-		Addr:              healthzaddr,
-		Handler:           healthzmux,
-		ReadHeaderTimeout: 5 * time.Second,
+	errCh := make(chan error, len(servers))
+	for name, srv := range servers {
+		go func() {
+			log.Info("server listening", "server", name, "addr", srv.Addr)
+			errCh <- srv.ListenAndServe()
+		}()
 	}
 
-	healthzShutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	go getmux(log, healthzsrv, healthzShutdownCtx)
-
-	<-ctx.Done()
-	log.Info("shutting down")
-	log.Info("healthz shutting down")
-}
-
-func getmux(log *slog.Logger, srv *http.Server, shutdownCtx context.Context) {
-	log.Info("server listening", "healthzaddr", srv.Addr)
-	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		log.Error("listen failed", "err", err)
-		os.Exit(1)
+	select {
+	case <-ctx.Done():
+		log.Info("shutting down")
+	case err := <-errCh:
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Error("listen failed", "err", err)
+			os.Exit(1)
+		}
+		return
 	}
 
-	if err := srv.Shutdown(shutdownCtx); err != nil {
-		log.Error("healthz shutdown failed", "err", err)
+	for name, srv := range servers {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		log.Info("shutting down server", "server", name, "addr", srv.Addr)
+		if err := srv.Shutdown(shutdownCtx); err != nil {
+			log.Error("shutdown failed", "addr", srv.Addr, "err", err)
+		}
 	}
 }
 
