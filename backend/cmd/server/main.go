@@ -45,6 +45,7 @@ func main() {
 			Addr:              healthzaddr,
 			Handler:           api.HealthzRouter(),
 			ReadHeaderTimeout: 5 * time.Second,
+			WriteTimeout:      10 * time.Second,
 		},
 	}
 
