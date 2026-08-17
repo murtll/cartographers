@@ -6,75 +6,45 @@ import (
 	"github.com/murtll/cartographers/backend/internal/room"
 )
 
-func TestCode(t *testing.T) {
-	s1 := "FGH56T"
-	expected_s1 := "FGH56T"
-
-	s2 := " Ghjt76 "
-	expected_s2 := "GHJT76"
-
-	s3 := "GHH"
-	expected_s3 := ""
-
-	s4 := "FGH56Т"
-	expected_s4 := ""
-
-	actual, err := room.NormalizeCode(s1)
-	if err != nil {
-		t.Errorf("Should not produce an error")
-	}
-	if expected_s1 != actual {
-		t.Errorf("Result was incorrect, got: %s, expected %s", actual, expected_s1)
+func TestNormalizationCode(t *testing.T) {
+	tests := map[string]string{
+		"FGH56T":   "FGH56T", // must been converted
+		" Ghjt76 ": "GHJT76", // must been converted
+		"GHH":      "",       // must been drop with error
+		"FGH56Т":   "",       // must been drop with error
 	}
 
-	actual, err = room.NormalizeCode(s2)
-	if err != nil {
-		t.Errorf("Should not produce an error")
-	}
-	if expected_s2 != actual {
-		t.Errorf("Result was incorrect, got: %s, expected %s", actual, expected_s2)
-	}
-
-	actual, err = room.NormalizeCode(s3)
-	if err == nil {
-		t.Errorf("Should not produce an error")
-	}
-	if expected_s3 != actual {
-		t.Errorf("Result was incorrect, got: %s, expected %s", actual, expected_s3)
-	}
-
-	actual, err = room.NormalizeCode(s4)
-	if err == nil {
-		t.Errorf("Should not produce an error")
-	}
-	if expected_s4 != actual {
-		t.Errorf("Result was incorrect, got: %s, expected %s", actual, expected_s4)
-	}
-
-	if new_actual, err := room.NewCode(); err == nil {
-		t.Log("code:", new_actual)
-		if normalise_actual, err := room.NormalizeCode(new_actual); err != nil {
-			t.Errorf("Should not produce an error")
-		} else if normalise_actual != new_actual {
-			t.Errorf("Result was incorrect, got: %s, expected %s", actual, expected_s3)
+	for k, v := range tests {
+		actual, err := room.NormalizeCode(k)
+		if v == "" {
+			if err == nil {
+				t.Errorf("should produce an error")
+			}
+		} else {
+			if err != nil {
+				t.Errorf("should not produce an error")
+			}
+		}
+		if v != actual {
+			t.Errorf("result was incorrect, got: %s, expected %s", actual, v)
 		}
 	}
+}
 
-	if new_actual, err := room.NewCode(); err == nil {
-		t.Log("code:", new_actual)
-		if normalise_actual, err := room.NormalizeCode(new_actual); err != nil {
-			t.Errorf("Should not produce an error")
-		} else if normalise_actual != new_actual {
-			t.Errorf("Result was incorrect, got: %s, expected %s", actual, expected_s3)
-		}
-	}
-
-	if new_actual, err := room.NewCode(); err == nil {
-		t.Log("code:", new_actual)
-		if normalise_actual, err := room.NormalizeCode(new_actual); err != nil {
-			t.Errorf("Should not produce an error")
-		} else if normalise_actual != new_actual {
-			t.Errorf("Result was incorrect, got: %s, expected %s", actual, expected_s3)
+func TestNewCode(t *testing.T) {
+	tests := make(map[string]string)
+	for i := 1; i <= 3; i++ {
+		if actual, err := room.NewCode(); err == nil {
+			if _, ok := tests[actual]; !ok {
+				tests[actual] = ""
+			} else {
+				t.Errorf("the room codes are repeated")
+			}
+			if normalise_actual, err := room.NormalizeCode(actual); err != nil {
+				t.Errorf("should not produce an error")
+			} else if normalise_actual != actual {
+				t.Errorf("result was incorrect, got: %s, expected %s", actual, normalise_actual)
+			}
 		}
 	}
 }
