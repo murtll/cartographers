@@ -6,11 +6,17 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+
 	"github.com/murtll/cartographers/backend/internal/boards"
 )
 
 func NewRouter() *chi.Mux {
 	mux := chi.NewRouter()
+
+	mux.Use(middleware.RequestID)
+	mux.Use(middleware.Logger)
+	mux.Use(middleware.Recoverer)
 
 	mux.Route("/api", func(mux chi.Router) {
 		mux.Route("/rooms", func(mux chi.Router) {
@@ -20,6 +26,9 @@ func NewRouter() *chi.Mux {
 			mux.Post("/{code}/moves", move)
 		})
 		mux.Get("/boards/{id}", getBoard)
+		mux.Get("/panic", func(w http.ResponseWriter, r *http.Request) {
+			panic("boom")
+		})
 	})
 
 	return mux
