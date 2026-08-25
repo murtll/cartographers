@@ -38,7 +38,6 @@ func Load() (Config, error) {
 }
 
 
-// TODO дописать func env 
 func envWithDefault(key, fallback string) string {
 	if v := os.Getenv(key); v != "" {
 		return v
@@ -46,7 +45,6 @@ func envWithDefault(key, fallback string) string {
 	return fallback
 }
 
-// TODO написать func env для параметров с дефолт значениями что бы при запуске env код не падал а отдавал эти значения
 func env(key string) (string, error) {
 	if v := os.Getenv(key); v != "" {
 		return v, nil
