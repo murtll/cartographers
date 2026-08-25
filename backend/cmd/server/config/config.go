@@ -6,37 +6,40 @@ import (
 )
 
 type Config struct {
-	Port        string
-	HealthzPort string
+	// no defualt value
+	CookieKey   string
 	DatabaseURL string
-	CookieKey   []byte
+
+	// have default value
+	HealthzAddr string
+	Addr        string
+	LogLevel	string
+	LogFormat	string
 }
 
 func Load() (Config, error) {
 	var cfg Config
 	var errs []error
 
-	cfg.Port = os.Getenv("PORT")
-	if cfg.Port == "" {
-		errs = append(errs, errors.New("PORT не задан"))
-	}
+	cfg.HealthzAddr = envWithDefault("HEALTHZ_ADDR", ":9090")
+	cfg.Addr = envWithDefault("ADDR", ":8080")
+	cfg.LogLevel = envWithDefault("LOG_LEVEL", "INFO")
+	cfg.LogFormat = envWithDefault("LOG_FORMAT", "text")
 
-	cfg.DatabaseURL = os.Getenv("DATABASE_URL")
-	if cfg.DatabaseURL == "" {
-		errs = append(errs, errors.New("DATABASE_URL не задан"))
-	}
 
-	cfg.CookieKey = []byte(os.Getenv("COOKIE_SIGNING_KEY"))
-	if cfg.CookieKey == nil {
-		errs = append(errs, errors.New("COOKIE_SIGNING_KEY не задан"))
-	}
+	var err error
+	cfg.DatabaseURL, err = env("DATABASE_URL")
+	errs = append(errs, err)
+
+	cfg.CookieKey, err = env("COOKIE_SECRET_KEY")
+	errs = append(errs, err)
 
 	return cfg, errors.Join(errs...)
 }
 
 
 // TODO дописать func env 
-func env(key, fallback string) string {
+func envWithDefault(key, fallback string) string {
 	if v := os.Getenv(key); v != "" {
 		return v
 	}
@@ -44,3 +47,9 @@ func env(key, fallback string) string {
 }
 
 // TODO написать func env для параметров с дефолт значениями что бы при запуске env код не падал а отдавал эти значения
+func env(key string) (string, error) {
+	if v := os.Getenv(key); v != "" {
+		return v, nil
+	}
+	return "", errors.New(key + " not set")
+}

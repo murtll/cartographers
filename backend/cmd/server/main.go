@@ -8,6 +8,7 @@ package main
 import (
 	"context"
 	"errors"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -15,20 +16,23 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/murtll/cartographers/backend/cmd/server/config"
 	"github.com/murtll/cartographers/backend/internal/api"
 	"github.com/murtll/cartographers/backend/internal/boards"
 )
 
 func main() {
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	log := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 	if err := boards.LoadAll(); err != nil {
 		log.Error(err.Error())
 		os.Exit(1)
 	}
-
-	addr := ":" + env("PORT", "8080")
-	healthzaddr := ":" + env("HEALTHZ_PORT", "9090")
 
 	// WriteTimeout здесь пока что нет намеренно с рассчетом на SSE
 	// тк он долго держит запрос открытым
@@ -37,12 +41,12 @@ func main() {
 	// надо поресерчить чем будет плох такой подход
 	servers := map[string]*http.Server{
 		"main": {
-			Addr:              addr,
+			Addr:              cfg.Addr,
 			Handler:           api.NewRouter(),
 			ReadHeaderTimeout: 5 * time.Second,
 		},
 		"healthz": {
-			Addr:              healthzaddr,
+			Addr:              cfg.HealthzAddr,
 			Handler:           api.HealthzRouter(),
 			ReadHeaderTimeout: 5 * time.Second,
 			WriteTimeout:      10 * time.Second,
@@ -79,11 +83,4 @@ func main() {
 			log.Error("shutdown failed", "addr", srv.Addr, "err", err)
 		}
 	}
-}
-
-func env(key, fallback string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
-	}
-	return fallback
 }
