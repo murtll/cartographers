@@ -13,8 +13,8 @@ type Config struct {
 	// have default value
 	HealthzAddr string
 	Addr        string
-	LogLevel	string
-	LogFormat	string
+	LogLevel    string
+	LogFormat   string
 }
 
 func Load() (Config, error) {
@@ -26,7 +26,6 @@ func Load() (Config, error) {
 	cfg.LogLevel = envWithDefault("LOG_LEVEL", "INFO")
 	cfg.LogFormat = envWithDefault("LOG_FORMAT", "text")
 
-
 	var err error
 	cfg.DatabaseURL, err = env("DATABASE_URL")
 	errs = append(errs, err)
@@ -36,7 +35,6 @@ func Load() (Config, error) {
 
 	return cfg, errors.Join(errs...)
 }
-
 
 func envWithDefault(key, fallback string) string {
 	if v := os.Getenv(key); v != "" {
