@@ -1,0 +1,70 @@
+name: Check PR
+
+on:
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write  # needed to post the results comment on PRs
+    env:
+      GH_TOKEN: ${{ github.token }}
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: 'backend/go.mod'
+      - run: go build -v ./...
+      - run: |
+          set -o pipefail
+          make test | tee output.txt
+      - if: always()
+        run: |
+          set -o pipefail
+          echo '### `go test` results' > comment.txt
+          echo '```' >> comment.txt
+          cat output.txt | grep -v "go test" | sed -e 's/^?/🙈 ?/g' -e 's/^ok/✅ ok/g' -e 's/FAIL/❌ FAIL/g' | tee -a comment.txt
+          echo '```' >> comment.txt
+          gh pr comment ${{ github.event.pull_request.number }} --body-file comment.txt
+
+  lint:
+    name: Lint 
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write  # needed to post the results comment on PRs
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: 'backend/go.mod'
+      - uses: danhunsaker/golang-github-actions@v1.3.0
+        with:
+          run: staticcheck
+          token: ${{ github.token }}
+          directory: backend
+      - uses: danhunsaker/golang-github-actions@v1.3.0
+        with:
+          run: fmt
+          token: ${{ github.token }}
+          directory: backend
+      - uses: danhunsaker/golang-github-actions@v1.3.0
+        with:
+          run: vet
+          token: ${{ github.token }}
+          directory: backend

@@ -1,4 +1,4 @@
-include ../.env
+-include ../.env
 export
 
 dev:
@@ -10,8 +10,13 @@ migrate-up:
 migrate-down:
 	migrate -path migrations -database ${DATABASE_URL} down
 
-test: 
-	go test ./...
+test:
+	go test -race ./...
 
-full-check:
-	test -z "$$(gofmt -l .)" && go vet ./... && go test -race ./...
+fmt:
+	gofmt -s -d -e .
+
+vet:
+	go vet ./...
+
+full-check: fmt vet test
