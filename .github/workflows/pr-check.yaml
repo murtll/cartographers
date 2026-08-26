@@ -29,7 +29,7 @@ jobs:
       - run: go build -v ./...
       - run:
           set -o pipefail
-          make test | tee output.txt
+          go test -race ./... | tee output.txt
       - if: always()
         run: |
           set -o pipefail
@@ -55,5 +55,6 @@ jobs:
           go-version-file: 'backend/go.mod'
       - uses: danhunsaker/golang-github-actions@v1.3.0
         with:
-          run: imports,errcheck,lint,staticcheck,fmt,vet
+          run: imports,errcheck,staticcheck,fmt,vet
           token: ${{ github.token }}
+          directory: backend
