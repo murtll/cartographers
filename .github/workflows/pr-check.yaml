@@ -12,6 +12,8 @@ jobs:
     permissions:
       contents: read
       pull-requests: write  # needed to post the results comment on PRs
+    env:
+      GH_TOKEN: ${{ github.token }}
     defaults:
       run:
         working-directory: backend
