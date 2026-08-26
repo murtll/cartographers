@@ -27,9 +27,9 @@ jobs:
         with:
           go-version-file: 'backend/go.mod'
       - run: go build -v ./...
-      - run:
+      - run: |
           set -o pipefail
-          go test -race ./... | tee output.txt
+          make test | tee output.txt
       - if: always()
         run: |
           set -o pipefail
