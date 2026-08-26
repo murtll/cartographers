@@ -34,7 +34,7 @@ jobs:
         run: |
           set -o pipefail
           echo '### `go test` results' > comment.txt
-          echo '```' > comment.txt
+          echo '```' >> comment.txt
           cat output.txt | grep -v "go test" | sed -e 's/^?/🙈 ?/g' -e 's/^ok/✅ ok/g' -e 's/FAIL/❌ FAIL/g' | tee -a comment.txt
           echo '```' >> comment.txt
           gh pr comment ${{ github.event.pull_request.number }} --body-file comment.txt
