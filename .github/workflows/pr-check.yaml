@@ -58,16 +58,13 @@ jobs:
           run: staticcheck
           token: ${{ github.token }}
           directory: backend
-        continue-on-error: true
       - uses: danhunsaker/golang-github-actions@v1.3.0
         with:
           run: fmt
           token: ${{ github.token }}
           directory: backend
-        continue-on-error: true
       - uses: danhunsaker/golang-github-actions@v1.3.0
         with:
           run: vet
           token: ${{ github.token }}
           directory: backend
-        continue-on-error: true
