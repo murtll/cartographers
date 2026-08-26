@@ -27,9 +27,12 @@ jobs:
         with:
           go-version-file: 'backend/go.mod'
       - run: go build -v ./...
-      - run: touch ../env && make test | tee output.txt
+      - run:
+          set -o pipefail
+          touch ../.env && make test | tee output.txt
       - if: always()
         run: |
+          set -o pipefail
           echo '### `go test` results' > comment.txt
           echo '```' > comment.txt
           cat output.txt | grep -v "go test" | sed -e 's/^?/🙈 ?/g' -e 's/^ok/✅ ok/g' -e 's/FAIL/❌ FAIL/g' | tee -a comment.txt
