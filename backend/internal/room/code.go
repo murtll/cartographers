@@ -8,6 +8,7 @@ import (
 	"unicode/utf8"
 )
 
+
 const alphabet = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 const code_length = 6
 
