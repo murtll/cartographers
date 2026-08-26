@@ -8,8 +8,8 @@ import (
 
 func TestNormalizationCode(t *testing.T) {
 	tests := map[string]string{
-		"FGH56T":   "FGH56T ", // must been converted
-		" Ghjt76 ": "GHJT76 ", // must been converted
+		"FGH56T":   "FGH56T", // must been converted
+		" Ghjt76 ": "GHJT76", // must been converted
 		"GHH":      "",       // must been drop with error
 		"FGH56Т":   "",       // must been drop with error
 	}
