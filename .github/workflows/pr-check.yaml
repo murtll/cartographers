@@ -12,22 +12,15 @@ jobs:
     permissions:
       contents: read
       pull-requests: write  # needed to post the results comment on PRs
+    defaults:
+      run:
+        working-directory: backend
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with:
-          go-version-file: 'go.mod'
-      - run: make test | tee output.txt
-      - uses: actions/github-script@v3
-        with:
-          github-token: ${{ github.token }}
-          script: |
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: readFile('output.txt')
-            })
+          go-version-file: 'backend/go.mod'
+      - run: make test
 
   lint:
     name: Lint 
@@ -35,20 +28,12 @@ jobs:
     permissions:
       contents: read
       pull-requests: write  # needed to post the results comment on PRs
+    defaults:
+      run:
+        working-directory: backend
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with:
-          go-version-file: 'go.mod'
-      - run: make fmt vet | tee output.txt 
-      - uses: actions/github-script@v3
-        with:
-          github-token: ${{ github.token }}
-          script: |
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: readFile('output.txt')
-            })
-
+          go-version-file: 'backend/go.mod'
+      - run: make fmt vet
