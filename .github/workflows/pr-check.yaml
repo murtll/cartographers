@@ -20,7 +20,15 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: 'backend/go.mod'
-      - run: touch ../.env && make test
+      - run: go build -v ./...
+      - run: make test | tee output.txt
+      - if: always()
+        run: |
+          echo "### `go test` results" > comment.txt
+          echo ``` > comment.txt
+          cat output.txt | grep -v "go test" | sed -e 's/^?/🙈 ?/g' -e 's/^ok/✅ ok/g' -e 's/FAIL/❌ FAIL/g' | tee -a comment.txt
+          echo ``` >> comment.txt
+          gh pr comment ${{ github.event.pull_request.number }} --body-file comment.txt
 
   lint:
     name: Lint 
@@ -36,4 +44,7 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: 'backend/go.mod'
-      - run: touch ../.env make fmt vet
+      - uses: danhunsaker/golang-github-actions@v1.3.0
+        with:
+          run: imports,errcheck,lint,staticcheck,fmt,vet
+          token: ${{ github.token }}
