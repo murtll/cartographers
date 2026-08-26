@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: 'backend/go.mod'
-      - run: make test
+      - run: touch ../.env && make test
 
   lint:
     name: Lint 
@@ -36,4 +36,4 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: 'backend/go.mod'
-      - run: make fmt vet
+      - run: touch ../.env make fmt vet
