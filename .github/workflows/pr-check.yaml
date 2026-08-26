@@ -21,13 +21,13 @@ jobs:
         with:
           go-version-file: 'backend/go.mod'
       - run: go build -v ./...
-      - run: make test | tee output.txt
+      - run: touch ../env && make test | tee output.txt
       - if: always()
         run: |
-          echo "### `go test` results" > comment.txt
-          echo ``` > comment.txt
+          echo '### `go test` results' > comment.txt
+          echo '```' > comment.txt
           cat output.txt | grep -v "go test" | sed -e 's/^?/🙈 ?/g' -e 's/^ok/✅ ok/g' -e 's/FAIL/❌ FAIL/g' | tee -a comment.txt
-          echo ``` >> comment.txt
+          echo '```' >> comment.txt
           gh pr comment ${{ github.event.pull_request.number }} --body-file comment.txt
 
   lint:
