@@ -27,10 +27,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	log := slog.New(slog.NewTextHandler(os.Stdout, nil))
-
 	if err := boards.LoadAll(); err != nil {
-		log.Error(err.Error())
+		cfg.Logger.Error(err.Error())
 		os.Exit(1)
 	}
 
@@ -42,7 +40,7 @@ func main() {
 	servers := map[string]*http.Server{
 		"main": {
 			Addr:              cfg.Addr,
-			Handler:           api.NewRouter(),
+			Handler:           api.NewRouter(cfg.Logger),
 			ReadHeaderTimeout: 5 * time.Second,
 		},
 		"healthz": {
@@ -59,17 +57,17 @@ func main() {
 	errCh := make(chan error, len(servers))
 	for name, srv := range servers {
 		go func() {
-			log.Info("server listening", "server", name, "addr", srv.Addr)
+			cfg.Logger.Info("server listening", "server", name, "addr", srv.Addr)
 			errCh <- srv.ListenAndServe()
 		}()
 	}
 
 	select {
 	case <-ctx.Done():
-		log.Info("shutting down")
+		cfg.Logger.Info("shutting down")
 	case err := <-errCh:
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Error("listen failed", "err", err)
+			cfg.Logger.Error("listen failed", "err", err)
 			os.Exit(1)
 		}
 		return
@@ -78,9 +76,9 @@ func main() {
 	for name, srv := range servers {
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		log.Info("shutting down server", "server", name, "addr", srv.Addr)
+		cfg.Logger.Info("shutting down server", "server", name, "addr", srv.Addr)
 		if err := srv.Shutdown(shutdownCtx); err != nil {
-			log.Error("shutdown failed", "addr", srv.Addr, "err", err)
+			cfg.Logger.Error("shutdown failed", "addr", srv.Addr, "err", err)
 		}
 	}
 }
