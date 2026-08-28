@@ -6,6 +6,16 @@ import (
 	"strings"
 )
 
+const (
+	healthzAddrDefault = ":9090"
+	addrDefault        = ":8080"
+	logLevelDefault    = "INFO"
+	logFormatDefault   = "text"
+)
+
+var logLevelAllowedValues = [...]string{"DEBUG", "INFO", "WARN", "ERROR"}
+var logFormatAllowedValues = [...]string{"text", "json"}
+
 type Config struct {
 	// no defualt value
 	CookieKey   string
@@ -18,33 +28,23 @@ type Config struct {
 	LogFormat   string
 }
 
-const (
-	HealthzAddrDefault = ":9090"
-	AddrDefault        = ":8080"
-	LogLevelDefault    = "INFO"
-	LogFormatDefault   = "text"
-)
-
-var LogLevelAllowedValues = [...]string{"DEBUG", "INFO", "WARN", "ERROR"}
-var LogFormatAllowedValues = [...]string{"text", "json"}
-
 func Load() (Config, error) {
 	var cfg Config
 	var errs []error
 	var err error
 
-	cfg.HealthzAddr = envWithDefault("HEALTHZ_ADDR", HealthzAddrDefault)
-	cfg.Addr = envWithDefault("ADDR", AddrDefault)
+	cfg.HealthzAddr = envWithDefault("HEALTHZ_ADDR", healthzAddrDefault)
+	cfg.Addr = envWithDefault("ADDR", addrDefault)
 
-	logLevel := strings.ToUpper(envWithDefault("LOG_LEVEL", LogLevelDefault))
-	if err := checkAllowedValues("LOG_LEVEL", logLevel, LogLevelAllowedValues[:]); err != nil {
+	logLevel := strings.ToUpper(envWithDefault("LOG_LEVEL", logLevelDefault))
+	if err := checkAllowedValues("LOG_LEVEL", logLevel, logLevelAllowedValues[:]); err != nil {
 		errs = append(errs, err)
 	} else {
 		cfg.LogLevel = logLevel
 	}
 
-	logFormat := strings.ToLower(envWithDefault("LOG_FORMAT", LogFormatDefault))
-	if err := checkAllowedValues("LOG_FORMAT", logFormat, LogFormatAllowedValues[:]); err != nil {
+	logFormat := strings.ToLower(envWithDefault("LOG_FORMAT", logFormatDefault))
+	if err := checkAllowedValues("LOG_FORMAT", logFormat, logFormatAllowedValues[:]); err != nil {
 		errs = append(errs, err)
 	} else {
 		cfg.LogFormat = logFormat
