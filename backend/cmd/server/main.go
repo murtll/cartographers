@@ -47,7 +47,7 @@ func main() {
 	servers := map[string]*http.Server{
 		"main": {
 			Addr:              cfg.Addr,
-			Handler:           api.NewRouter(&log),
+			Handler:           api.NewRouter(log),
 			ReadHeaderTimeout: 5 * time.Second,
 		},
 		"healthz": {

@@ -6,18 +6,18 @@ import (
 	"os"
 )
 
-func NewLogger(format, level string) (slog.Logger, error) {
+func NewLogger(format, level string) (*slog.Logger, error) {
 	logLevel, err := parseLogLevel(level)
 	if err != nil {
-		return slog.Logger{}, err
+		return nil, err
 	}
 
 	handler, err := newLogHandler(format, logLevel)
 	if err != nil {
-		return slog.Logger{}, err
+		return nil, err
 	}
 	logger := slog.New(handler)
-	return *logger, nil
+	return logger, nil
 }
 
 func parseLogLevel(level string) (slog.Level, error) {
