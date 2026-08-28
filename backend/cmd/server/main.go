@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/murtll/cartographers/backend/cmd/server/config"
+	"github.com/murtll/cartographers/backend/cmd/server/logging"
 	"github.com/murtll/cartographers/backend/internal/api"
 	"github.com/murtll/cartographers/backend/internal/boards"
 )
@@ -27,8 +28,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	log, err := logging.NewLogger(cfg.LogFormat, cfg.LogLevel)
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
+
 	if err := boards.LoadAll(); err != nil {
-		cfg.Logger.Error(err.Error())
+		log.Error(err.Error())
 		os.Exit(1)
 	}
 
@@ -40,7 +47,7 @@ func main() {
 	servers := map[string]*http.Server{
 		"main": {
 			Addr:              cfg.Addr,
-			Handler:           api.NewRouter(cfg.Logger),
+			Handler:           api.NewRouter(&log),
 			ReadHeaderTimeout: 5 * time.Second,
 		},
 		"healthz": {
@@ -57,17 +64,17 @@ func main() {
 	errCh := make(chan error, len(servers))
 	for name, srv := range servers {
 		go func() {
-			cfg.Logger.Info("server listening", "server", name, "addr", srv.Addr)
+			log.Info("server listening", "server", name, "addr", srv.Addr)
 			errCh <- srv.ListenAndServe()
 		}()
 	}
 
 	select {
 	case <-ctx.Done():
-		cfg.Logger.Info("shutting down")
+		log.Info("shutting down")
 	case err := <-errCh:
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			cfg.Logger.Error("listen failed", "err", err)
+			log.Error("listen failed", "err", err)
 			os.Exit(1)
 		}
 		return
@@ -76,9 +83,9 @@ func main() {
 	for name, srv := range servers {
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		cfg.Logger.Info("shutting down server", "server", name, "addr", srv.Addr)
+		log.Info("shutting down server", "server", name, "addr", srv.Addr)
 		if err := srv.Shutdown(shutdownCtx); err != nil {
-			cfg.Logger.Error("shutdown failed", "addr", srv.Addr, "err", err)
+			log.Error("shutdown failed", "addr", srv.Addr, "err", err)
 		}
 	}
 }

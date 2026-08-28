@@ -2,8 +2,8 @@ package config
 
 import (
 	"errors"
-	"log/slog"
 	"os"
+	"strings"
 )
 
 type Config struct {
@@ -14,20 +14,42 @@ type Config struct {
 	// have default value
 	HealthzAddr string
 	Addr        string
-	Logger		*slog.Logger //logLevel and logFormat will be parsed in Load()
+	LogLevel    string
+	LogFormat   string
 }
+
+const (
+	HealthzAddrDefault = ":9090"
+	AddrDefault        = ":8080"
+	LogLevelDefault    = "INFO"
+	LogFormatDefault   = "text"
+)
+
+var LogLevelAllowedValues = [...]string{"DEBUG", "INFO", "WARN", "ERROR"}
+var LogFormatAllowedValues = [...]string{"text", "json"}
 
 func Load() (Config, error) {
 	var cfg Config
 	var errs []error
-
-	cfg.HealthzAddr = envWithDefault("HEALTHZ_ADDR", ":9090")
-	cfg.Addr = envWithDefault("ADDR", ":8080")
-	level := parseLogLevel(envWithDefault("LOG_LEVEL", "INFO"))
-	handler := newLogHandler(envWithDefault("LOG_FORMAT", "text"), level)
-	cfg.Logger = slog.New(handler)
-
 	var err error
+
+	cfg.HealthzAddr = envWithDefault("HEALTHZ_ADDR", HealthzAddrDefault)
+	cfg.Addr = envWithDefault("ADDR", AddrDefault)
+
+	logLevel := strings.ToUpper(envWithDefault("LOG_LEVEL", LogLevelDefault))
+	if err := checkAllowedValues("LOG_LEVEL", logLevel, LogLevelAllowedValues[:]); err != nil {
+		errs = append(errs, err)
+	} else {
+		cfg.LogLevel = logLevel
+	}
+
+	logFormat := strings.ToLower(envWithDefault("LOG_FORMAT", LogFormatDefault))
+	if err := checkAllowedValues("LOG_FORMAT", logFormat, LogFormatAllowedValues[:]); err != nil {
+		errs = append(errs, err)
+	} else {
+		cfg.LogFormat = logFormat
+	}
+
 	cfg.DatabaseURL, err = env("DATABASE_URL")
 	errs = append(errs, err)
 
@@ -51,25 +73,11 @@ func env(key string) (string, error) {
 	return "", errors.New(key + " not set")
 }
 
-func parseLogLevel(level string) slog.Level {
-	switch level {
-	case "DEBUG":
-		return slog.LevelDebug
-	case "WARN":
-		return slog.LevelWarn
-	case "ERROR":
-		return slog.LevelError
-	default:
-		return slog.LevelInfo
-	} 
-}
-
-func newLogHandler(format string, level slog.Level) slog.Handler {
-	opts := slog.HandlerOptions{Level: level}
-	switch format {
-	case "json":
-		return slog.NewJSONHandler(os.Stdout, &opts)
-	default:
-		return slog.NewTextHandler(os.Stdout, &opts)
+func checkAllowedValues(key, value string, allowedValues []string) error {
+	for _, target := range allowedValues {
+		if value == target {
+			return nil
+		}
 	}
+	return errors.New(key + " " + value + " not found")
 }
