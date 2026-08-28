@@ -7,10 +7,13 @@ import (
 )
 
 func TestLoadEmptyEnv(t *testing.T) {
+	t.Setenv("DATABASE_URL", "")
+	t.Setenv("COOKIE_SECRET_KEY", "")
 	_, err := config.Load()
 	if err == nil {
 		t.Errorf("should produce an error")
 	}
+
 }
 
 func TestLoad(t *testing.T) {

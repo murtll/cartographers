@@ -3,14 +3,28 @@ package api
 import (
 	"encoding/json"
 	"io"
+	"log/slog"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/httplog/v3"
+
 	"github.com/murtll/cartographers/backend/internal/boards"
 )
 
-func NewRouter() *chi.Mux {
+func NewRouter(log *slog.Logger) *chi.Mux {
+
 	mux := chi.NewRouter()
+
+	mux.Use(middleware.RequestID)
+	mux.Use(httplog.RequestLogger(log, &httplog.Options{
+		Level: slog.LevelInfo, // логируем все запросы независимо от переменной LOG_LEVEL
+		// Set log output to Elastic Common Schema (ECS) format.
+		Schema:            httplog.SchemaECS,
+		RecoverPanics:     true,
+		LogRequestHeaders: []string{"Origin"},
+	}))
 
 	mux.Route("/api", func(mux chi.Router) {
 		mux.Route("/rooms", func(mux chi.Router) {

@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/murtll/cartographers/backend/cmd/server/config"
+	"github.com/murtll/cartographers/backend/cmd/server/logging"
 	"github.com/murtll/cartographers/backend/internal/api"
 	"github.com/murtll/cartographers/backend/internal/boards"
 )
@@ -27,7 +28,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	log := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	log, err := logging.NewLogger(cfg.LogFormat, cfg.LogLevel)
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
 
 	if err := boards.LoadAll(); err != nil {
 		log.Error(err.Error())
@@ -42,7 +47,7 @@ func main() {
 	servers := map[string]*http.Server{
 		"main": {
 			Addr:              cfg.Addr,
-			Handler:           api.NewRouter(),
+			Handler:           api.NewRouter(log),
 			ReadHeaderTimeout: 5 * time.Second,
 		},
 		"healthz": {
