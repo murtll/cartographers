@@ -18,6 +18,7 @@ func NewRouter(log *slog.Logger) *chi.Mux {
 	mux := chi.NewRouter()
 
 	mux.Use(middleware.RequestID)
+	mux.Use(MiddleWareContentType)
 	mux.Use(httplog.RequestLogger(log, &httplog.Options{
 		Level: slog.LevelInfo, // логируем все запросы независимо от переменной LOG_LEVEL
 		// Set log output to Elastic Common Schema (ECS) format.
