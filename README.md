@@ -28,3 +28,7 @@ cp .env.example .env
 docker compose up
 ```
 Фронт поднимается на <http://localhost:5173>
+
+## Локальная разработка
+
+Для локальной Go разработки используются: [air](https://github.com/air-verse/air), [migrate](https://github.com/golang-migrate/migrate)
