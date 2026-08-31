@@ -28,17 +28,3 @@ cp .env.example .env
 docker compose up
 ```
 Фронт поднимается на <http://localhost:5173>
-
-Подробнее:
-[docs/local-setup.md](docs/local-setup.md).
-
-## Документация
-
-| файл | о чём |
-|------|-------|
-| [docs/local-setup.md](docs/local-setup.md) | локальное окружение: запуск, тесты, команды на каждый день, частые грабли |
-| [docs/game-rules.md](docs/game-rules.md) | задача игры и правила своими словами + таблица «термин из правил → имя в коде» |
-| [docs/architecture.md](docs/architecture.md) | архитектура и принятые договорённости |
-| [docs/stack.md](docs/stack.md) | стек разработки |
-| [docs/glossary.md](docs/glossary.md) | словарик: 73 термина, на него ссылается вся остальная документация |
-| [docs/roadmap.md](docs/roadmap.md) | процесс разработки |
