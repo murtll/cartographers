@@ -8,15 +8,18 @@
 
 </div>
 
-Go-бэкенд, React-фронтенд, монорепа.
-
-Правила для референса: <https://tesera.ru/images/items/1711725/Rules-kartografy-rus.pdf>
-
+Стэк:
+- монорепа
+- db - postgres
+- backend - go, chi
+- frontend - react, vite
 
 ## Правила сервера
 - читы - бан
 - кемперство - бан
 - оскорбление администрации - расстрел, потом бан
+
+Правила для референса: [текст](https://tesera.ru/images/items/1711725/Rules-kartografy-rus.pdf) / [видео](https://youtu.be/Mem57wGkQuU)
 
 ## Запуск
 
