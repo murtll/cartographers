@@ -10,7 +10,7 @@ type Props = {
  */
 export function InviteLink({ code }: Props) {
   const [copied, setCopied] = useState(false)
-  const url = `${window.location.origin}/room/${code}`
+  const url = new URL(`room/${code}`, `${window.location.origin}${import.meta.env.BASE_URL}`).toString()
 
   function copy() {
     navigator.clipboard.writeText(url).then(
