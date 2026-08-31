@@ -24,7 +24,7 @@
 ## Запуск
 
 ```sh
-cp .env.example .env
+cp backend/.env.example backend/.env
 docker compose up
 ```
 Фронт поднимается на <http://localhost:5173>
