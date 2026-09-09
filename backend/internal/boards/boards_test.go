@@ -16,10 +16,8 @@ func TestDefault(t *testing.T) {
 }
 
 func TestBoardsLength(t *testing.T) {
-	data := []byte(`{
-  "id": "testboard",
-  "name": "TestBoard",
-  "grid": [
+	data := []byte(`[
+    "...........",
     "......R.M..",
     "..RM.......",
     ".....C.....",
@@ -28,84 +26,52 @@ func TestBoardsLength(t *testing.T) {
     ".R...C.....",
     "........R..",
     ".........M.",
-    "..MR.......",
-    "..........."
-  ]
-}`)
+    "..MR......."
+  ]`)
 
-	if _, err := parseBoardData(data, "TestBoard"); !strings.Contains(err.Error(), "incorrect number of rows") {
+	var g Grid
+	if err := g.UnmarshalJSON(data); err == nil || !strings.Contains(err.Error(), "incorrect number of rows") {
 		t.Errorf("should produse an error")
 	}
 }
 
 func TestSymbolsLength(t *testing.T) {
-	data := []byte(`{
-  "id": "testboard",
-  "name": "TestBoard",
-  "grid": [
-  	"............",
-    "......R.M..",
-    "..RM.......",
-    ".....C.....",
-    "....CCR....",
-    "....CCC....",
-    ".R...C.....",
-    "........R..",
-    ".........M.",
-    "..MR.......",
-    "..........."
-  ]
-}`)
+	data := []string{
+		"............",
+		"......R.M..",
+		"..RM.......",
+		".....C.....",
+		"....CCR....",
+		"....CCC....",
+		".R...C.....",
+		"........R..",
+		".........M.",
+		"..MR.......",
+		"...........",
+	}
 
-	if _, err := parseBoardData(data, "TestBoard"); !strings.Contains(err.Error(), "incorrect number of symbols") {
+	if _, err := parseBoard(data); err == nil || !strings.Contains(err.Error(), "incorrect number of symbols") {
 		t.Errorf("should produse an error")
 	}
 }
 
 func TestUnknownSymbol(t *testing.T) {
-	data := []byte(`{
-  "id": "testboard",
-  "name": "TestBoard",
-  "grid": [
-  	"...........",
-    "......R.M..",
-    "..RM.......",
-    ".....C...Д.",
-    "....CCR....",
-    "....CCC....",
-    ".R...C.....",
-    "........R..",
-    ".........M.",
-    "..MR.......",
-    "..........."
-  ]
-}`)
-
-	if _, err := parseBoardData(data, "TestBoard"); !strings.Contains(err.Error(), "unknown symbol") {
-		t.Errorf("should produse an error")
+	data := []string{
+		"...........",
+		"......R.M..",
+		"..RM.......",
+		".....C...Д.",
+		"....CCR....",
+		"....CCC....",
+		".R...C.....",
+		"........R..",
+		".........M.",
+		"..MR.......",
+		"...........",
+		"...........",
 	}
-}
 
-func TestUnmatchedID(t *testing.T) {
-	data := []byte(`{
-  "id": "test",
-  "name": "TestBoard",
-  "grid": [
-  	"...........",
-    "......R.M..",
-    "..RM.......",
-    ".....C.....",
-    "....CCR....",
-    "....CCC....",
-    ".R...C.....",
-    "........R..",
-    ".........M.",
-    "..MR.......",
-    "..........."
-  ]
-}`)
-
-	if _, err := parseBoardData(data, "TestBoard"); !strings.Contains(err.Error(), "file name does not match its ID") {
+	if _, err := parseBoard(data); err == nil || !strings.Contains(err.Error(), "unknown symbol") {
 		t.Errorf("should produse an error")
 	}
 }

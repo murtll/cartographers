@@ -62,17 +62,21 @@ func (g *Grid) UnmarshalJSON(data []byte) error {
 }
 
 func Load(filename string) error {
+	var tempBoard Board
 	data, err := jsonFiles.ReadFile(filename)
 	if err != nil {
 		return errors.New("failed to open json file: " + err.Error())
 	}
 
-	board, err := parseBoardData(data, filename)
-	if err != nil {
-		return err
+	if err := json.Unmarshal(data, &tempBoard); err != nil {
+		return errors.New(filename + ": " + err.Error())
 	}
 
-	boards[board.ID] = board
+	if filename != tempBoard.ID+".json" {
+		return errors.New("file name does not match its ID: filename = " + filename + ", board.ID = " + tempBoard.ID)
+	}
+
+	boards[tempBoard.ID] = tempBoard
 
 	return nil
 }
@@ -123,18 +127,4 @@ func GetBoard(id string) (Board, error) {
 		return board, nil
 	}
 	return board, errors.New("unknown boards ID")
-}
-
-func parseBoardData(data []byte, filename string) (Board, error) {
-	var tempBoard Board
-
-	if err := json.Unmarshal(data, &tempBoard); err != nil {
-		return tempBoard, errors.New(filename + ": " + err.Error())
-	}
-
-	if filename != tempBoard.ID+".json" {
-		return tempBoard, errors.New("file name does not match its ID: filename = " + filename + ", board.ID = " + tempBoard.ID)
-	}
-
-	return tempBoard, nil
 }
