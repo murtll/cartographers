@@ -49,10 +49,6 @@ func (g *Grid) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	if len(gs) != BoardSize {
-		return errors.New("board loaded incorrect, incorrect number of rows " + strconv.Itoa(len(gs)))
-	}
-
 	grid, err := parseBoard(gs)
 	if err != nil {
 		return err
@@ -98,6 +94,10 @@ func LoadAll() error {
 
 func parseBoard(gs []string) (Grid, error) {
 	var grid Grid
+
+	if len(gs) != BoardSize {
+		return grid, errors.New("board loaded incorrect, incorrect number of rows " + strconv.Itoa(len(gs)))
+	}
 
 	for x, i := range gs {
 		if sl := utf8.RuneCountInString(i); sl != BoardSize {

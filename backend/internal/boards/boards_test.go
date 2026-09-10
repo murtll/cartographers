@@ -16,28 +16,46 @@ func TestDefault(t *testing.T) {
 }
 
 func TestBoardsLength(t *testing.T) {
-	data := []byte(`[
-    "...........",
-    "......R.M..",
-    "..RM.......",
-    ".....C.....",
-    "....CCR....",
-    "....CCC....",
-    ".R...C.....",
-    "........R..",
-    ".........M.",
-    "..MR......."
-  ]`)
+	data := []string{
+		"......R.M..", // 1
+		"..RM.......", // 2
+		".....C.....", // 3
+		"....CCR....", // 4
+		"....CCC....", // 5
+		".R...C.....", // 6
+		"........R..", // 7
+		".........M.", // 8
+		"..MR.......", // 9
+		"...........", // 10
+	}
 
-	var g Grid
-	if err := g.UnmarshalJSON(data); err == nil || !strings.Contains(err.Error(), "incorrect number of rows") {
+	if _, err := parseBoard(data); err == nil || !strings.Contains(err.Error(), "incorrect number of rows 10") {
+		t.Errorf("should produse an error")
+	}
+
+	data = []string{
+		"......R.M..", // 1
+		"..RM.......", // 2
+		".....C.....", // 3
+		"....CCR....", // 4
+		"....CCC....", // 5
+		".R...C.....", // 6
+		"........R..", // 7
+		".........M.", // 8
+		"..MR.......", // 9
+		"...........", // 10
+		"...........", // 11
+		"...........", // 12
+	}
+
+	if _, err := parseBoard(data); err == nil || !strings.Contains(err.Error(), "incorrect number of rows 12") {
 		t.Errorf("should produse an error")
 	}
 }
 
 func TestSymbolsLength(t *testing.T) {
 	data := []string{
-		"............",
+		"............", // 12 symbols
 		"......R.M..",
 		"..RM.......",
 		".....C.....",
@@ -50,7 +68,25 @@ func TestSymbolsLength(t *testing.T) {
 		"...........",
 	}
 
-	if _, err := parseBoard(data); err == nil || !strings.Contains(err.Error(), "incorrect number of symbols") {
+	if _, err := parseBoard(data); err == nil || !strings.Contains(err.Error(), "incorrect number of symbols 12") {
+		t.Errorf("should produse an error")
+	}
+
+	data = []string{
+		"..........", // 10 symbols
+		"......R.M..",
+		"..RM.......",
+		".....C.....",
+		"....CCR....",
+		"....CCC....",
+		".R...C.....",
+		"........R..",
+		".........M.",
+		"..MR.......",
+		"...........",
+	}
+
+	if _, err := parseBoard(data); err == nil || !strings.Contains(err.Error(), "incorrect number of symbols 10") {
 		t.Errorf("should produse an error")
 	}
 }
@@ -67,7 +103,6 @@ func TestUnknownSymbol(t *testing.T) {
 		"........R..",
 		".........M.",
 		"..MR.......",
-		"...........",
 		"...........",
 	}
 
