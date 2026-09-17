@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/murtll/cartographers/backend/internal/boards"
+	"github.com/murtll/cartographers/backend/internal/room"
 )
 
 func NewRouter() *chi.Mux {
@@ -27,7 +28,12 @@ func NewRouter() *chi.Mux {
 
 func createRoom(w http.ResponseWriter, r *http.Request) {
 	payload := make(map[string]any)
-	payload["code"] = "FG3J6K"
+	code, err := room.NewCode()
+	if err != nil {
+		Send(w, http.StatusBadRequest, NewErrorRessponse(err))
+		return
+	}
+	payload["code"] = code
 	Send(w, http.StatusOK, payload)
 }
 
